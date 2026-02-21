@@ -1,0 +1,3 @@
+Python
+PostgreSQL
+AWS S3 Bucket

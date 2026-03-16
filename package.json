@@ -1,0 +1,7 @@
+{
+  "name": "lamas-book-review-root",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm start --prefix frontend"
+  }
+}

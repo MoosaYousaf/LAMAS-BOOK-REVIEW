@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import LoginPage from './LoginPage';
-import Dashboard from './Dashboard';
+import LoginPage from './Pages/LoginPage';
+import Dashboard from './Pages/Dashboard';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 

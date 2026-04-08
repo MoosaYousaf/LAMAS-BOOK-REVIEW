@@ -1,7 +1,43 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import SearchBar from '../Components/SearchBar';
+
+console.log("SearchBar:", SearchBar);
 
 function Dashboard() {
+
+  const location = useLocation();
+  const user = location.state?.user; // Retrieve the user data passed from the LoginPage
+
+  const handleSearch = (query, type) => {
+    console.log(`Searching for: ${query} in ${type}`);
+  };
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+      <h2>LAMAS BOOK REVIEW</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        {user ? (
+          <>
+            <span>Welcome, <strong>{user.name}</strong>!</span>
+            {user.picture && <img src={user.picture} alt="Profile" style={{ width: '40px', borderRadius: '50%' }} />}
+          </>
+        ) : (
+          <span>Welcome, Guest!</span>
+        )}
+      </div>
+    </header>
+    
+    <main style={{ marginTop: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <h3>Search Books or Friends</h3>
+        <SearchBar onSearch={handleSearch} />
+      </main>
+    </div>
+  );
+}
+
+{/*
   const location = useLocation();
   const user = location.state?.user; // Retrieve the user data passed from the LoginPage
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +49,7 @@ function Dashboard() {
   };
 
   return (
+
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
         <h2>LAMAS BOOK REVIEW</h2>
@@ -45,6 +82,7 @@ function Dashboard() {
       </main>
     </div>
   );
+*/
 }
 
 export default Dashboard;

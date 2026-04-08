@@ -1,5 +1,6 @@
 import React from 'react'
-import { SampleFriendList } from 
+import { SampleFriendList } from "./Sample FriendList";
+import { useState } from 'react';
 
   const FriendPage = () => {
     const [friends, setFriends] = useState([
@@ -15,7 +16,7 @@ import { SampleFriendList } from
 
   // Add a New Friend
   const handleAddFriend = () => {
-    if newFriend.trim() === "") return;
+    if (newFriend.trim() === "") return;
     const nextId = friends.length > 0 ? friends[friends.length - 1].id + 1 : 1;
     setFriends([...friends, { id: nextId, name: newFriend }]);
     setNewFriend("");

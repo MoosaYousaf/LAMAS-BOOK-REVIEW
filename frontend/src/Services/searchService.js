@@ -16,7 +16,7 @@ export const searchDatabase = async (query, type) => {
     queryBuilder = queryBuilder.ilike("book_title", `%${query}%`);
   }
 
-  const { data, error } = await queryBuilder.limit(8);
+  const { data, error } = await queryBuilder.limit(100);
   
   if (error) {
     console.error("Supabase Error:", error);

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SearchBar from '../Components/SearchBar';
 
 console.log("SearchBar:", SearchBar);
@@ -7,11 +7,24 @@ console.log("SearchBar:", SearchBar);
 function Dashboard() {
 
   const location = useLocation();
+  const navigate = useNavigate();
   const user = location.state?.user; // Retrieve the user data passed from the LoginPage
 
   const handleSearch = (query, type) => {
-    console.log(`Searching for: ${query} in ${type}`);
-  };
+  console.log("--- DASHBOARD SEARCH TRIGGERED ---");
+  console.log("Query:", query);
+  console.log("Type:", type);
+
+  if (!query) {
+    console.warn("Search blocked: Query is empty");
+    return;
+  }
+
+  const url = `/search?q=${encodeURIComponent(query)}&type=${type}`;
+  console.log("Navigating to:", url);
+  
+  navigate(url);
+};
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>

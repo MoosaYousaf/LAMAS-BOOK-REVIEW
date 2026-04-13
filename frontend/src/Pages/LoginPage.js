@@ -1,67 +1,78 @@
-import React from 'react';
-import { GoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from "jwt-decode";
-
-/*
-
+import React, { useState } from 'react';
 import { supabase } from '../Services/supabaseClient';
-import { useEffect } from 'react';
-import SearchBar from '../Components/SearchBar';
-
-
-
-Comment out lines 22-33 and uncomment lines 35-50 to get back to normal login page.
-
-Lines 22-33 are for testing connection to supabase and fetching data from Books table.
-
-Currently working on setting up a search bar component for our website.
-
-*/
-
-
-
-
+import { useNavigate } from 'react-router-dom';
 
 function LoginPage() {
-/*
-  useEffect(() => {
-    async function test() {
-      const { data, error} = await supabase.from('Books').select('*');
-
-      console.log('Data:', data);
-    }
-
-    test();
-    }, []);
-    
-    return <div> Check Console </div>;
-}
-*/
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSuccess = (credentialResponse) => {
-    console.log('Login Success:', credentialResponse);
-    // Decode the JWT token to get user info
-    const decodedUser = jwtDecode(credentialResponse.credential);
-    console.log('Decoded User:', decodedUser);
-    // Redirect to the dashboard and pass the user data in state
-    navigate('/dashboard', { state: { user: decodedUser } });
+  // 1. Google Login Handler
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        // Dashboard will check if the user has a profile record
+        redirectTo: 'http://localhost:3000/dashboard',
+      },
+    });
   };
 
-  const handleError = () => {
-    console.log('Login Failed');
+  // 2. Email/Password Login Handler
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { alert(error.message); }
+    else { navigate('/dashboard'); }
+
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px' }}>
-      <h2>Login to LAMAS BOOK REVIEW</h2>
-      <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+    <div style={styles.container}>
+      <h2>LAMAS BOOK REVIEW</h2>
+
+      {/* Google Auth Button */}
+      <button onClick={handleGoogleLogin} style={styles.googleBtn}>
+        Continue with Google
+      </button>
+
+      <div style={styles.divider}>OR</div>
+
+      {/* Maunal Login Form */}
+      <form onSubmit={handleEmailLogin} style={styles.form}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          style={styles.input}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          style={styles.input}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit" style={styles.submitBtn}>Login</button>
+      </form>
+
+      <p style={styles.linkText}>Don't have an account? <a href="/signup">Sign Up</a></p>
+      <p style={styles.linkText}><a href="/forgotPassword">Forgot Password?</a></p>
     </div>
   );
-
 }
-  
 
+const styles = {
+  container: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px', gap: '15px', fontFamily: 'Arial' },
+  googleBtn: { padding: '12px 20px', backgroundColor: '#4285F4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' },
+  form: { display: 'flex', flexDirection: 'column', gap: '10px', width: '300px' },
+  input: { padding: '10px', borderRadius: '5px', border: '1px solid #ccc' },
+  submitBtn: { padding: '10px', backgroundColor: '#333', color: 'white', borderRadius: '5px', cursor: 'pointer', border: 'none' },
+  divider: { margin: '10px 0', color: '#666' },
+  linkText: { fontSize: '14px' }
+};
 
 export default LoginPage;

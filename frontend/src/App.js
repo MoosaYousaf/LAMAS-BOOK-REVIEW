@@ -8,6 +8,7 @@ import CreateAccountPage from './Pages/CreateAccountPage';
 import SignUpPage from './Pages/SignUpPage';
 import ForgotPasswordPage from './Pages/PasswordRecovery/ForgotPasswordPage';
 import ResetPasswordPage from './Pages/PasswordRecovery/RecoverPasswordPage';
+import PersonalAccountPage from './Pages/PersonalAcount/PersonalAccountPage';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/createAccount" element={<CreateAccountPage />} />
           <Route path="/forgotPassword" element={<ForgotPasswordPage/>} />
           <Route path="/resetPassword" element={<ResetPasswordPage/>} />
+          <Route path="/profile" element={<PersonalAccountPage />} />
         </Routes>
       </Router>
     </GoogleOAuthProvider>

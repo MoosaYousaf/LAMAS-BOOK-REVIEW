@@ -77,6 +77,10 @@ return (
           <h3>Search Books or Users</h3>
           <SearchBar onSearch={handleSearch} />
       </main>
+
+      <button onClick={() => navigate('/profile')} style={{ marginTop: '30px', padding: '10px 20px', borderRadius: '5px', background: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' }}>
+        View Profile
+      </button>
     </div>
   );
 }

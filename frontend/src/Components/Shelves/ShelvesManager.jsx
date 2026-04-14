@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../Services/supabaseClient';
+import { supabase } from '../../Services/supabaseClient';
 
-const SHELVES = [
+export const SHELVES = [
   {
     slug: 'to-read',
     label: 'To Read',
@@ -20,13 +20,27 @@ const SHELVES = [
   },
 ];
 
-function ShelvesPage() {
+/**
+ * Reusable shelves manager UI.
+ *
+ * Can be rendered as a full page, or embedded in another page
+ * (for example, a user profile/personal account page).
+ */
+function ShelvesManager({
+  title = 'My Shelves',
+  onRequireLogin,
+  onBack,
+  showBackButton = true,
+}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('Reader');
   const [entries, setEntries] = useState([]);
   const [savingEntryId, setSavingEntryId] = useState(null);
   const [activeShelf, setActiveShelf] = useState('all');
+
+  // Defaults keep the component usable directly as a route element with no wrappers.
+  const handleBack = onBack || (() => navigate('/dashboard'));
 
   useEffect(() => {
     const loadShelves = async () => {
@@ -35,7 +49,8 @@ function ShelvesPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        navigate('/');
+        if (onRequireLogin) onRequireLogin();
+        else navigate('/');
         return;
       }
 
@@ -51,8 +66,6 @@ function ShelvesPage() {
         setUsername(user.email || 'Reader');
       }
 
-      // Fetch current user's shelf entries. If table/relations are not yet populated,
-      // we gracefully show empty shelves so UI remains fully usable.
       const shelvesResponse = await supabase
         .from('UserBookShelves')
         .select(`
@@ -83,7 +96,7 @@ function ShelvesPage() {
     };
 
     loadShelves();
-  }, [navigate]);
+  }, [navigate, onRequireLogin]);
 
   const grouped = useMemo(() => {
     return SHELVES.reduce((acc, shelf) => {
@@ -138,12 +151,14 @@ function ShelvesPage() {
     <div style={styles.page}>
       <header style={styles.header}>
         <div>
-          <h2 style={styles.title}>My Shelves</h2>
+          <h2 style={styles.title}>{title}</h2>
           <p style={styles.subtitle}>Welcome, <strong>{username}</strong>.</p>
         </div>
-        <button style={styles.buttonSecondary} onClick={() => navigate('/dashboard')}>
-          Back to Dashboard
-        </button>
+        {showBackButton && (
+          <button style={styles.buttonSecondary} onClick={handleBack}>
+            Back to Dashboard
+          </button>
+        )}
       </header>
 
       <div style={styles.summaryRow}>
@@ -367,4 +382,4 @@ const styles = {
   },
 };
 
-export default ShelvesPage;
+export default ShelvesManager;

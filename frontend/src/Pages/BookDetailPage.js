@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react'
+import { supabase } from '../Services/supabaseClient';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const FEATURED_BOOKS = [

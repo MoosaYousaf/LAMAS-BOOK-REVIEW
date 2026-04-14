@@ -66,6 +66,12 @@ return (
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
         <h2>LAMAS BOOK REVIEW</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <button
+          onClick={() => navigate('/shelves')}
+          style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
+        >
+          My Shelves
+        </button>
           {userProfile ? (
             <>
               <span>Welcome, <strong>{userProfile.username}</strong>!</span>
@@ -103,6 +109,11 @@ return (
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
         <h2>LAMAS BOOK REVIEW</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <button
+          onClick={() => navigate('/shelves')}
+          style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}>
+          My Shelves
+        </button>
           {user ? (
             <>
               <span>Welcome, <strong>{user.name}</strong>!</span>

@@ -14,7 +14,6 @@ const FEATURED_Books = [
     id: 2,
     title: "Mice of Men",
     author: "John Steinbeck",
-    price: $9.99,
     genre: "Fiction/Tragedy"
   },
 
@@ -22,7 +21,6 @@ const FEATURED_Books = [
     id: 3
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
-    price: $19.99,
     genre: "Fiction/Tragedy/Romance"
   },
 
@@ -30,12 +28,28 @@ const FEATURED_Books = [
     id: 4
     title: "The Hunger Games",
     author: "Suzanne Collins",
-    price: "$15.99",
     genere: "Young Adult"
   },
 
   {
-    id:
+    id: 5
+    title: "Percy Jackson & The Olympians: The Lightning Thief",
+    author: "Rick Riordan",
+    genere: "Fantasy"
+  },
+
+  {
+    id: 6
+    title: "Percy Jackson & The Olympians: The Lightning Thief",
+    author: "Rick Riordan",
+    genere: "Fantasy"
+  },
+
+  {
+    id: 7
+    title: "To Kill a Mockingbird",
+    author:  "Harper Lee",
+    genere: "Fiction"
   }
 ];
 

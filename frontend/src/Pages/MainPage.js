@@ -21,7 +21,7 @@ const FEATURED_Books = [
   {
     id: 3
     title: "The Great Gatsby",
-    author:
+    author: "F. Scott Fitzgerald",
     price: $19.99,
     genre: "Fiction/Tragedy/Romance"
   },

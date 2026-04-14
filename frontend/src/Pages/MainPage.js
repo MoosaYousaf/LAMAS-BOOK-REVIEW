@@ -83,7 +83,6 @@ const MainPage = () => {
                 <h3 style={styles.bookTitle}>{book.title}</h3>
                 <p style={styles.author}>{book.author}</p>
                 <p style={styles.genre}>{book.genre}</p>
-                <p style={styles.price}>${book.price.toFixed(2)}</p>
                 <button style={styles.button}>View Details</button>
               </div>
             </div>

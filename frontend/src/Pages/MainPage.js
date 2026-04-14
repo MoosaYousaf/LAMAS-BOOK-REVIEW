@@ -64,7 +64,7 @@ const MainPage = () => {
 
   return (
     <div style={styles.container}>
-      <header style={styles.header}>
+      <h2>LAMAS BOOK REVIEW</h2>
         <h1>BookStore</h1>
         <p>Discover your next favorite story.</p>
       </header>

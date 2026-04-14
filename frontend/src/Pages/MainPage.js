@@ -58,7 +58,7 @@ const MainPage = () => {
   const navigate = useNavigate();
 
   const handleBookClick = (id) => {
-    // Navigate to a dynamic route like /book/1
+    // Navigate towards each book
     navigate(`/book/${id}`);
   };
 

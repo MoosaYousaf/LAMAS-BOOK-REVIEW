@@ -62,13 +62,28 @@ function SearchPage() {
           ) : (
             <>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
-                {currentItems.map((item) => (
+                {currentItems.map((item) =>
                   searchType === 'users' ? (
                     <UserCard key={item.id} user={item} />
                   ) : (
-                    <BookCard key={item.id} book={item} />
+                    <div
+                      key={item.id ?? item.isbn}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/book/${encodeURIComponent(item.isbn ?? '')}`, { state: { book: item } })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/book/${encodeURIComponent(item.isbn ?? '')}`, { state: { book: item } });
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                      aria-label={`View details for ${item.book_title ?? 'book'}`}
+                    >
+                      <BookCard book={item} />
+                    </div>
                   )
-                ))}
+                )}
               </div>
 
               {/* Pagination */}

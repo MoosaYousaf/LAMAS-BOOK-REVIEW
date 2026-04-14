@@ -6,7 +6,6 @@ const FEATURED_Books = [
     id: 1,
     title: "The Hate U Give",
     author: "Angie Thomas",
-    price: $11.99,
     genre: "Young Adult"
   },
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { HiHome } from 'react-icons/hi'; // Import the Home Icon
 import { searchDatabase } from '../Services/searchService';
 import SearchBar from '../Components/SearchBar';
 import BookCard from '../Components/Cards/BookCard';
 import UserCard from '../Components/Cards/UserCard';
+import SidebarNav from '../Components/SidebarNav';
 
 function SearchPage() {
   const location = useLocation();
@@ -18,8 +18,6 @@ function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
-
-  const sandBrownLight = '#E5D3B3'; 
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -45,60 +43,14 @@ function SearchPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      
-      {/* Thinner Sidebar */}
-      <aside style={{ 
-        width: '70px', 
-        backgroundColor: sandBrownLight, 
-        padding: '20px 0',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxShadow: '2px 0 5px rgba(0,0,0,0.05)'
-      }}>
-        <h2 style={{ fontSize: '0.8rem', color: '#5D4037', marginBottom: '30px', fontWeight: 'bold' }}>LAMAS</h2>
-        
-        {/* React Home Icon Button */}
-        <button 
-          onClick={() => navigate('/dashboard')}
-          title="Home"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '10px',
-            color: '#5D4037', // Matches your "Sand Brown" theme text
-            transition: 'transform 0.1s, color 0.1s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.color = '#3E2723'; // Darker on hover
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.color = '#5D4037';
-          }}
-        >
-          <HiHome size={32} />
-        </button>
-      </aside>
+      <SidebarNav />
 
-      {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <header style={{ 
-          padding: '20px', 
-          borderBottom: '1px solid #eee', 
-          display: 'flex', 
-          justifyContent: 'center',
-          backgroundColor: '#fff'
-        }}>
+      <div style={{ flex: 1 }}>
+        <header style={{ padding: '20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'center' }}>
           <SearchBar onSearch={handleNewSearch} />
         </header>
 
-        <main style={{ padding: '40px', backgroundColor: '#fafafa', flex: 1 }}>
+        <main style={{ padding: '40px' }}>
           <h3 style={{ color: '#5D4037', marginBottom: '20px' }}>Results for "{searchTerm}"</h3>
           
           {loading ? (

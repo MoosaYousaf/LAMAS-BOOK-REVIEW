@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../Services/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../Components/SearchBar';
+import SidebarNav from '../Components/SidebarNav';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -58,25 +59,29 @@ function Dashboard() {
 if (loading) return <div style={{ padding: '20px'}}>Syncing session...</div>;
 
 return (
-  <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-      <h2>LAMAS BOOK REVIEW</h2>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        {userProfile ? (
-          <>
-            <span>Welcome, <strong>{userProfile.username}</strong>!</span>
-            {userProfile.avatar_url && <img src={userProfile.avatar_url} alt="Profile" style={{ width: '40px', borderRadius: '50%', objectFit: 'cover' }} />}
-          </>
-          ) : (
-            <span>Welcome, Guest!</span>
-          )}
-        </div>
-      </header>
-      
-      <main style={{ marginTop: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h3>Search Books or Users</h3>
-          <SearchBar onSearch={handleSearch} />
-      </main>
+  <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+    <SidebarNav />
+
+    <div style={{ flex: 1, padding: '20px' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+        <h2>LAMAS BOOK REVIEW</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          {userProfile ? (
+            <>
+              <span>Welcome, <strong>{userProfile.username}</strong>!</span>
+              {userProfile.avatar_url && <img src={userProfile.avatar_url} alt="Profile" style={{ width: '40px', borderRadius: '50%', objectFit: 'cover' }} />}
+            </>
+            ) : (
+              <span>Welcome, Guest!</span>
+            )}
+          </div>
+        </header>
+        
+        <main style={{ marginTop: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h3>Search Books or Users</h3>
+            <SearchBar onSearch={handleSearch} />
+        </main>
+      </div>
     </div>
   );
 }

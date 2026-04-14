@@ -1,16 +1,15 @@
-import React from 'react'
-import { SampleFriendList } from "./Sample FriendList";
-import { useState } from 'react';
+import React, { useState } from 'react';
+import SidebarNav from '../Components/SidebarNav';
 
-  const FriendPage = () => {
-    const [friends, setFriends] = useState([
-      { id: 1, name: "Seth" },
-      { id: 2, name: "Lior" },
-      { id: 3, name: "Awaadh" },
-      { id: 4, name: "Arshan"},
-      { id: 5, name: "Moosa"},
-      { id: 6, name: "Avash"},
-      ]);
+const FriendPage = () => {
+  const [friends, setFriends] = useState([
+    { id: 1, name: "Seth" },
+    { id: 2, name: "Lior" },
+    { id: 3, name: "Awaadh" },
+    { id: 4, name: "Arshan" },
+    { id: 5, name: "Moosa" },
+    { id: 6, name: "Avash" },
+  ]);
 
   const [newFriend, setNewFriend] = useState("");
 
@@ -28,8 +27,11 @@ import { useState } from 'react';
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
-      <h1>My Friends on LAMAS BOOK REVIEW</h1>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <SidebarNav />
+
+      <div style={{ flex: 1, padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
+        <h1>My Friends on LAMAS BOOK REVIEW</h1>
 
       <ul style={{ listStyle: "none", padding: 0 }}>
         {friends.map((friend) => (
@@ -60,10 +62,9 @@ import { useState } from 'react';
         />
         <button onClick={handleAddFriend}>Add Friend</button>
       </div>
+      </div>
     </div>
   );
 };
 
 export default FriendPage;
-
-  

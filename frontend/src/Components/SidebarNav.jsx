@@ -20,6 +20,7 @@ function SidebarNav() {
   const navItems = [
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'Friends', path: '/friends' },
+    { label: 'Settings', path: '/settings' },
   ];
 
   const goToMyProfile = () => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { searchDatabase } from '../Services/searchService';
+import { supabase } from '../Services/supabaseClient';
 import SearchBar from '../Components/SearchBar';
 import BookCard from '../Components/Cards/BookCard';
 import UserCard from '../Components/Cards/UserCard';
@@ -26,8 +27,23 @@ function SearchPage() {
         return;
       }
       setLoading(true);
+
+      // fetch search results
       const data = await searchDatabase(searchTerm, searchType);
-      setResults(data || []);
+
+      if ( searchType === 'users' && data ) {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          const filteredUsers = data.filter(profile => profile.id !== user.id);
+          setResults(filteredUsers);
+        } else {
+          setResults(data);
+        }
+      } else {
+        setResults(data || []);
+      }
+
       setLoading(false);
       setCurrentPage(1); 
     };
@@ -61,14 +77,41 @@ function SearchPage() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
-                {currentItems.map((item) => (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
+                {currentItems.map((item) =>
                   searchType === 'users' ? (
-                    <UserCard key={item.id} user={item} />
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        if (item.id) {
+                          // navigate to the dynamic profile route
+                          navigate(`/profile/${item.id}`);
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                      aria-label={`View profile for ${item.username ?? 'user'}`}
+                    >
+                      <UserCard user={item} />
+                    </div>
                   ) : (
-                    <BookCard key={item.id} book={item} />
+                    <div
+                      key={item.id ?? item.isbn}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/book/${encodeURIComponent(item.isbn ?? '')}`, { state: { book: item } })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/book/${encodeURIComponent(item.isbn ?? '')}`, { state: { book: item } });
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                      aria-label={`View details for ${item.book_title ?? 'book'}`}
+                    >
+                      <BookCard book={item} />
+                    </div>
                   )
-                ))}
+                )}
               </div>
 
               {/* Pagination */}

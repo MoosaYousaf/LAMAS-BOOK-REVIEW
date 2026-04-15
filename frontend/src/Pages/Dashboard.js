@@ -44,8 +44,6 @@ function Dashboard() {
   }
 
   const url = `/search?q=${encodeURIComponent(query)}&type=${type}`;
-  //console.log("Navigating to:", url);
-  
   navigate(url);
 };
 

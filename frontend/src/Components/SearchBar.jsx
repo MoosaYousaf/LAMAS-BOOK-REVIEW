@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { searchDatabase } from '../Services/searchService';
+import { supabase } from '../Services/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const SearchBar = ({ onSearch }) => {
+    const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [type, setType] = useState('title');
     const [results, setResults] = useState([]);
@@ -12,7 +15,15 @@ const SearchBar = ({ onSearch }) => {
     useEffect(() => {
         const delay = setTimeout(async () => {
             if (query.trim().length > 1) { // Only search if > 1 char
-                const data = await searchDatabase(query, type);
+                let data = await searchDatabase(query, type);
+
+                if (type === 'users') {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        data = data.filter(u => u.id !== user.id); // exclude current user
+                    }
+                }
+
                 setResults(data);
                 setShowDropdown(true);
             } else {
@@ -36,6 +47,21 @@ const SearchBar = ({ onSearch }) => {
     }, []);
 
     const handleSelect = (item) => {
+        // Logic for Users
+        if (type === "users") {
+            if (item.id) {
+                navigate(`/profile/${item.id}`)
+                setShowDropdown(false);
+                setQuery(''); // Clear the search bar after navigation
+            }
+        } else {
+            if (item.isbn) {
+                navigate(`/book/${item.isbn}`);
+                setShowDropdown(false);
+                setQuery(''); // Clear the search bar after navigation
+            }
+        }
+        /*
         // Logic to determine what string to show in the bar after clicking
         let displayValue = "";
         if (type === "users") displayValue = item.username;
@@ -45,6 +71,7 @@ const SearchBar = ({ onSearch }) => {
         setQuery(displayValue);
         setShowDropdown(false);
         onSearch(displayValue, type);
+            */
     };
 
     return (

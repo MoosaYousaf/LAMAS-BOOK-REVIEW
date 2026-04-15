@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { HiHome } from 'react-icons/hi'; // Import the Home Icon
 import { searchDatabase } from '../Services/searchService';
+import { supabase } from '../Services/supabaseClient';
 import SearchBar from '../Components/SearchBar';
 import BookCard from '../Components/Cards/BookCard';
 import UserCard from '../Components/Cards/UserCard';
+import SidebarNav from '../Components/SidebarNav';
 
 function SearchPage() {
   const location = useLocation();
@@ -19,8 +20,6 @@ function SearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
-  const sandBrownLight = '#E5D3B3'; 
-
   useEffect(() => {
     const fetchResults = async () => {
       if (!searchTerm) {
@@ -28,8 +27,23 @@ function SearchPage() {
         return;
       }
       setLoading(true);
+
+      // fetch search results
       const data = await searchDatabase(searchTerm, searchType);
-      setResults(data || []);
+
+      if ( searchType === 'users' && data ) {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          const filteredUsers = data.filter(profile => profile.id !== user.id);
+          setResults(filteredUsers);
+        } else {
+          setResults(data);
+        }
+      } else {
+        setResults(data || []);
+      }
+
       setLoading(false);
       setCurrentPage(1); 
     };
@@ -45,60 +59,14 @@ function SearchPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      
-      {/* Thinner Sidebar */}
-      <aside style={{ 
-        width: '70px', 
-        backgroundColor: sandBrownLight, 
-        padding: '20px 0',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxShadow: '2px 0 5px rgba(0,0,0,0.05)'
-      }}>
-        <h2 style={{ fontSize: '0.8rem', color: '#5D4037', marginBottom: '30px', fontWeight: 'bold' }}>LAMAS</h2>
-        
-        {/* React Home Icon Button */}
-        <button 
-          onClick={() => navigate('/dashboard')}
-          title="Home"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '10px',
-            color: '#5D4037', // Matches your "Sand Brown" theme text
-            transition: 'transform 0.1s, color 0.1s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.color = '#3E2723'; // Darker on hover
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.color = '#5D4037';
-          }}
-        >
-          <HiHome size={32} />
-        </button>
-      </aside>
+      <SidebarNav />
 
-      {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <header style={{ 
-          padding: '20px', 
-          borderBottom: '1px solid #eee', 
-          display: 'flex', 
-          justifyContent: 'center',
-          backgroundColor: '#fff'
-        }}>
+      <div style={{ flex: 1 }}>
+        <header style={{ padding: '20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'center' }}>
           <SearchBar onSearch={handleNewSearch} />
         </header>
 
-        <main style={{ padding: '40px', backgroundColor: '#fafafa', flex: 1 }}>
+        <main style={{ padding: '40px' }}>
           <h3 style={{ color: '#5D4037', marginBottom: '20px' }}>Results for "{searchTerm}"</h3>
           
           {loading ? (
@@ -109,14 +77,41 @@ function SearchPage() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
-                {currentItems.map((item) => (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
+                {currentItems.map((item) =>
                   searchType === 'users' ? (
-                    <UserCard key={item.id} user={item} />
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        if (item.id) {
+                          // navigate to the dynamic profile route
+                          navigate(`/profile/${item.id}`);
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                      aria-label={`View profile for ${item.username ?? 'user'}`}
+                    >
+                      <UserCard user={item} />
+                    </div>
                   ) : (
-                    <BookCard key={item.id} book={item} />
+                    <div
+                      key={item.id ?? item.isbn}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/book/${encodeURIComponent(item.isbn ?? '')}`, { state: { book: item } })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/book/${encodeURIComponent(item.isbn ?? '')}`, { state: { book: item } });
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                      aria-label={`View details for ${item.book_title ?? 'book'}`}
+                    >
+                      <BookCard book={item} />
+                    </div>
                   )
-                ))}
+                )}
               </div>
 
               {/* Pagination */}

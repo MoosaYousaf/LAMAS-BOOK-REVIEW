@@ -18,7 +18,7 @@ function CreateAccountPage() {
     useEffect(() => {
         const checkStatus = async () => {
             // get authenticated user from supabase
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            const { data: { user } } = await supabase.auth.getUser();
 
             if (!user) {
                 // if no user is logged in, they shouldn't be here

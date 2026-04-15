@@ -15,13 +15,18 @@ const UserCard = ({ user }) => (
             backgroundColor: '#007bff',
             color: 'white',
             display: 'flex',
-            alighItems: 'center',
+            alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold'
         }}>
             {user.username?.charAt(0).toUpperCase()}
         </div>
-        <strong>{user.username}</strong>
+        <strong>{user.username || 'Unknown user'}</strong>
+        {user?.full_name && (
+            <div style={{fontsize: '12px', color:'#666'}}>
+                {user.full_name}
+            </div>
+        )}
     </div>
 );
 

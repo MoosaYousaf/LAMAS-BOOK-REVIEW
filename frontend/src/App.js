@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import LoginPage from './Pages/LoginPage';
+import MainPage from './Pages/MainPage';
 import Dashboard from './Pages/Dashboard';
 import SearchPage from './Pages/SearchPage';
 import CreateAccountPage from './Pages/CreateAccountPage';
@@ -33,6 +34,7 @@ function App() {
           <Route path="/shelves" element={<ShelvesManager />} />
           <Route path="/profile/:userId?" element={<Profile />} />
           <Route path="/settings" element={<SettingPage />} />
+          <Route path="/main> element={<MainPage />} />
         </Routes>
       </Router>
     </GoogleOAuthProvider>

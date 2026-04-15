@@ -1,55 +1,76 @@
-import React, { useState } from 'react'
-import { supabase } from '../Services/supabaseClient';
+import React, { useState } from 'react';
+// import { supabase } from '../Services/supabaseClient'; // Unused in this snippet
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const FEATURED_Books = [
+const FEATURED_BOOKS = [
   {
     id: 1,
     title: "The Hate U Give",
     author: "Angie Thomas",
-    genre: "Young Adult"
+    genre: "Young Adult Literature, Novel, Fiction",
   },
 
   {
     id: 2,
-    title: "Mice of Men",
+    title: "Of Mice and Men",
     author: "John Steinbeck",
-    genre: "Fiction/Tragedy"
+    genre: "Tragedy",
   },
 
   {
     id: 3,
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
-    genre: "Fiction/Tragedy/Romance"
+    genre: "Novel, Tragedy, Literary Fiction",
   },
 
   {
     id: 4,
     title: "The Hunger Games",
     author: "Suzanne Collins",
-    genere: "Young Adult"
+    genre: "Novel, Young Adult Literature, Science Fiction",
   },
 
   {
     id: 5,
-    title: "Percy Jackson & The Olympians: The Lightning Thief",
+    title: "The Lightning Thief",
     author: "Rick Riordan",
-    genere: "Fantasy"
+    genre: "Novel, Greek Mythology, Young Adult Literature",
   },
 
   {
     id: 6,
-    title: "Percy Jackson & The Olympians: The Lightning Thief",
+    title: "Sea of Monsters",
     author: "Rick Riordan",
-    genere: "Fantasy"
+    genre: "Greek Mythology, Novel, Fantasy Fiction, Children's Literature, Adventure Fiction, Action Fiction",
   },
 
   {
     id: 7,
     title: "To Kill a Mockingbird",
-    author:  "Harper Lee",
-    genere: "Fiction"
+    author: "Harper Lee",
+    genre: "Novel, Bildungsroman, Coming-Of-Age Story",
+  },
+  
+  {
+    id: 8,
+    title: "The Alchemist",
+    author: "Paulo Coelho",
+    genre: "Novel, Drama, Quest, Fantasy Fiction, Bildungsroman, Adventure Fiction", // Fixed typo "genere"
+  },
+
+  {
+    id: 9,
+    title: "The Color Purple",
+    author: "Alice Walker",
+    genere: "Novel, Epistolary Novel, Domestic Fiction",
+  },
+
+  {
+    id: 10,
+    title: "Things Fall Apart",
+    author: "Chinua Achebe",
+    genere: "Historical Fiction,Tragedy",
   }
 ];
 
@@ -63,35 +84,36 @@ const MainPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h2>LAMAS BOOK REVIEW</h2>
-        <h1>BookStore</h1>
-        <p>Discover your next favorite story.</p>
-      </header>
+      <div style={styles.container}>
+        <header style={styles.header}> {/* Added missing opening tag */}
+          <h2>LAMAS BOOK REVIEW</h2>
+          <h1>BookStore</h1>
+          <p>Discover your next favorite story.</p>
+        </header>
 
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Featured Books</h2>
-        <div style={styles.grid}>
-          {books.map((book) => (
-            <div 
-              key={book.id} 
-              style={styles.card} 
-              onClick={() => handleBookClick(book.id)}
-            >
-              <img src={book.cover} alt={book.title} style={styles.image} />
-              <div style={styles.info}>
-                <h3 style={styles.bookTitle}>{book.title}</h3>
-                <p style={styles.author}>{book.author}</p>
-                <p style={styles.genre}>{book.genre}</p>
-                <button style={styles.button}>View Details</button>
+        <section style={styles.section}>
+          <h2 style={styles.sectionTitle}>Featured Books</h2>
+          <div style={styles.grid}>
+            {books.map((book) => (
+              <div 
+                key={book.id} 
+                style={styles.card} 
+                onClick={() => handleBookClick(book.id)}
+              >
+                <img src={book.cover} alt={book.title} style={styles.image} />
+                <div style={styles.info}>
+                  <h3 style={styles.bookTitle}>{book.title}</h3>
+                  <p style={styles.author}>{book.author}</p>
+                  <p style={styles.genre}>{book.genre}</p>
+                  <button style={styles.button}>View Details</button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-};
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  };
 
 const styles = {
   container: { padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto' },

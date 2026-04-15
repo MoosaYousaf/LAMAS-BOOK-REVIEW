@@ -37,6 +37,11 @@ function Dashboard() {
     syncUserSession();
   }, [navigate]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
   const handleSearch = (query, type) => {
   if (!query) {
     console.warn("Search blocked: Query is empty");
@@ -78,6 +83,12 @@ return (
             ) : (
               <span>Welcome, Guest!</span>
             )}
+          <button
+            onClick={handleLogout}
+            style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
+          >
+            Logout
+          </button>
           </div>
         </header>
         

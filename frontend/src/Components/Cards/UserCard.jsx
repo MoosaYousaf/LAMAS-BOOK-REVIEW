@@ -1,4 +1,6 @@
-const UserCard = ({ user }) => (
+const UserCard = ({ user }) => {
+  if (!user) return null;
+  return (
     <div style={{
         border: '1px solid #ddd',
         borderRadius: '8px',
@@ -28,6 +30,7 @@ const UserCard = ({ user }) => (
             </div>
         )}
     </div>
-);
+  );
+};
 
 export default UserCard;

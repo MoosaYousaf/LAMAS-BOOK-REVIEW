@@ -12,6 +12,7 @@ import ShelvesManager from './Components/Shelves/ShelvesManager';
 import FriendsPage from './Pages/FriendsPage';
 import BookDetailPage from './Pages/BookDetailPage';
 import Profile from './Pages/PersonalAccount/Profile';
+import Notifications from './Pages/Notifications';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="/resetPassword" element={<ResetPasswordPage/>} />
           <Route path="/shelves" element={<ShelvesManager />} />
           <Route path="/profile/:userId?" element={<Profile />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </Router>
     </GoogleOAuthProvider>

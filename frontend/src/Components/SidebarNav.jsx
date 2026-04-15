@@ -25,6 +25,7 @@ function SidebarNav() {
   const goToMyProfile = () => {
     if (myId) navigate(`/profile/${myId}`);
   }
+
   return (
     <aside
       style={{
@@ -35,6 +36,9 @@ function SidebarNav() {
         boxSizing: 'border-box',
       }}
     >
+
+
+      {/* Top Section: Main Menu */}
       <div>
         <div style={{ fontWeight: 700, marginBottom: '12px' }}>MENU</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -60,8 +64,39 @@ function SidebarNav() {
         </div>
       </div>
 
-      {/* Personal Account Button */}
-      <div style={{ borderTop: '1px solid #eee', pt: '15px', textAlign: 'center' }}>
+      {/* Personal Notification & Account Button */}
+      <div style={{ 
+        borderTop: '1px solid #eee', 
+        paddingTop: '15px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        gap: '10px' 
+      }}>
+
+        {/* Notifications Button */}
+        <button
+          onClick={() => navigate('/notifications')}
+          title="Notifications"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '5px',
+            display: 'flex',
+            justifyContent: 'center',
+            transition: 'transform 0.1s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <IoPersonCircleOutline 
+            size={32} 
+            color={location.pathname === '/notifications' ? '#007bff' : '#555'} 
+          />
+        </button>
+
+        {/* Profile Button */}
         <button
           onClick={goToMyProfile}
           title="My Profile"
@@ -74,10 +109,12 @@ function SidebarNav() {
             justifyContent: 'center',
             width: '100%'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
           <IoPersonCircleOutline 
             size={40} 
-            color={location.pathname.includes(myId) ? '#007bff' : '#555'} 
+            color={location.pathname.includes(myId) && myId !== null ? '#007bff' : '#555'} 
           />
         </button>
       </div>

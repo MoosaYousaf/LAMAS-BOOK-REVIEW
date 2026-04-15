@@ -51,6 +51,13 @@ const FEATURED_Books = [
     author:  "Harper Lee",
     genere: "Fiction"
   }
+  
+  {
+    id: 8,
+    title: "The Alchemist",
+    author: "Paulo Coelho"
+    genere: "Novel, Drama, Quest, Fantasy Fiction, Bildungsroman, Adventure fiction"
+  }
 ];
 
 const MainPage = () => {

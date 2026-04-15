@@ -1,87 +1,88 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { supabase } from '../../Services/supabaseClient';
 
-const NotificationRow = ({ notification, isPrivateAccount }) => {
-
-    const [uiStatus, setUiStatus] = useState('pending'); // pending, accepted, following_back, declined
-    const [isVisible, setIsVisible] = useState(true); // To hide the row if declined
-
-    if (!isVisible) return null;
+const NotificationRow = ({ notification, refresh }) => {
+    const { follower_id, status, username, isAlreadyFollowingBack } = notification;
 
     const handleAccept = async () => {
-        const { error } = await supabase
-            .from('Followers')
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Update status to accepted -
+        await supabase.from('Followers')
             .update({ status: 'accepted' })
-            .eq('id', notification.follow_row_id);
+            .eq('follower_id', follower_id)
+            .eq('following_id', user.id);
         
-        if (!error) setUiStatus('accepted');
+        refresh(); // Refresh parent to update UI and counts via trigger
     };
 
     const handleDecline = async () => {
-        const { error } = await supabase
-            .from('Followers')
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        await supabase.from('Followers')
             .delete()
-            .eq('id', notification.follow_row_id);
+            .eq('follower_id', follower_id)
+            .eq('following_id', user.id);
+        
+        refresh();
     };
 
     const handleFollowBack = async () => {
         const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-        const { error } = await supabase
-            .from('Followers')
-            .insert([{
-                follower_id: user.id,
-                following_id: notification.follower_id,
-                status: 'accepted'
-            }]);
+        // Fetch target's privacy setting -
+        const { data: profile } = await supabase
+            .from('Profiles')
+            .select('is_private')
+            .eq('id', follower_id)
+            .single();
 
-        if (!error) setUiStatus('following_back');
+        const newStatus = profile?.is_private ? 'pending' : 'accepted';
 
+        await supabase.from('Followers').insert([{
+            follower_id: user.id,
+            following_id: follower_id,
+            status: newStatus
+        }]);
+        
+        refresh();
     };
 
     return (
-        <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '15px 20px', borderBottom: '1px solid #eee', width: '100%', boxSizing: 'border-box'
+        <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            padding: '15px', 
+            borderBottom: '1px solid #eee' 
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <div style={{
-                    width: '40px', height: '40px', borderRadius: '50%',
-                    backgroundColor: '#007bff', color: 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
-                }}>
-                    {notification.username.charAt(0).toUpperCase()}
-                </div>
-                <span><strong>{notification.username}</strong> followed you</span>
-            </div>
+            <span>
+                <strong>{username}</strong> {status === 'pending' ? 'requested to follow you' : 'followed you'}
+            </span>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {/* Logic 1: Private Account + Pending = Accept/Decline */}
-                {isPrivateAccount && uiStatus === 'pending' && (
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                {status === 'pending' && (
                     <>
-                        <button onClick={handleAccept} style={{ padding: '6px 15px', borderRadius: '4px', border: 'none', backgroundColor: '#007bff', color: 'white', cursor: 'pointer' }}>
-                            Accept
-                        </button>
-                        <button onClick={handleDecline} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#888' }}>
-                            ✕
-                        </button>
+                        <button onClick={handleAccept} style={btnStyle.accept}>Accept</button>
+                        <button onClick={handleDecline} style={btnStyle.decline}>✕</button>
                     </>
                 )}
-
-                {/* Logic 2: Public Account OR Already Accepted = Follow Back */}
-                {((!isPrivateAccount && uiStatus === 'pending') || (isPrivateAccount && uiStatus === 'accepted')) && (
-                    <button onClick={handleFollowBack} style={{ padding: '6px 15px', borderRadius: '4px', border: '1px solid #007bff', backgroundColor: 'white', color: '#007bff', cursor: 'pointer' }}>
-                        Follow Back
-                    </button>
+                {status === 'accepted' && !isAlreadyFollowingBack && (
+                    <button onClick={handleFollowBack} style={btnStyle.followBack}>Follow Back</button>
                 )}
-
-                {/* Logic 3: Mutual connection complete */}
-                {uiStatus === 'following_back' && (
-                    <span style={{ fontSize: '12px', color: '#888', fontStyle: 'italic' }}>Mutual followers</span>
-                )}
+                {isAlreadyFollowingBack && <span style={{ color: '#888', fontSize: '12px', fontWeight: '500' }}>Mutual</span>}
             </div>
         </div>
     );
+};
+
+const btnStyle = {
+    accept: { backgroundColor: '#007bff', color: 'white', border: 'none', padding: '6px 16px', borderRadius: '4px', cursor: 'pointer' },
+    decline: { background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: '18px', padding: '0 10px' },
+    followBack: { border: '1px solid #007bff', color: '#007bff', background: 'white', padding: '6px 16px', borderRadius: '4px', cursor: 'pointer' }
 };
 
 export default NotificationRow;

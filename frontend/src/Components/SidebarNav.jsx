@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../Services/supabaseClient';
-import { IoPersonCircleOutline } from 'react-icons/io5';
+import { IoPersonCircleOutline, IoNotificationsCircle } from 'react-icons/io5';
 
 function SidebarNav() {
   const navigate = useNavigate();
@@ -90,7 +90,7 @@ function SidebarNav() {
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <IoPersonCircleOutline 
+          <IoNotificationsCircle 
             size={32} 
             color={location.pathname === '/notifications' ? '#007bff' : '#555'} 
           />

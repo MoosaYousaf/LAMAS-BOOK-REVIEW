@@ -1,6 +1,15 @@
 import React from 'react';
 
-const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus }) => {
+const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus, onFollowAction }) => {
+
+    const getButtonContent = () => {
+        if (followStatus === 'accepted') return { text: 'Unfollow', color: '#e0e0e0', textColor: '#333' };
+        if (followStatus === 'pending') return { text: 'Requested', color: '#f0f0f0', textColor: '#666' };
+        return { text: 'Follow', color: '#007bff', textColor: '#fff' };
+    }
+
+    const buttonStyles = getButtonContent();
+
     return (
         <div style={{ 
             display: 'flex', 
@@ -28,17 +37,20 @@ const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus }) => {
 
             {/* Show follow button ONLY if it's not your own profile */}
             {!isOwnProfile && (
-                <button style={{
-                    padding: '10px 25px',
-                    borderRadius: '20px',
-                    border: 'none',
-                    backgroundColor: followStatus === 'accepted' ? '#e0e0e0' : '#007bff',
-                    color: followStatus === 'accepted' ? '#333' : '#fff',
-                    fontWeight: 'bold',
-                    cursor: 'pointer'
-                }}>
-                    {followStatus === 'accepted' ? 'Following' : 
-                        followStatus === 'Pending' ? 'Requested' : 'Follow'}
+                <button 
+                    onClick={onFollowAction}
+                    style={{
+                        padding: '10px 25px',
+                        borderRadius: '20px',
+                        border: '1px solid #ddd',
+                        backgroundColor: buttonStyles.color,
+                        color: buttonStyles.textColor,
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        minWidth: '110px'
+                    }}
+                >
+                    {buttonStyles.text}
                 </button>
             )}
         </div>

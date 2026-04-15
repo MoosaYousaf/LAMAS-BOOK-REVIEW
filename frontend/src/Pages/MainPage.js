@@ -7,56 +7,70 @@ const FEATURED_BOOKS = [
     id: 1,
     title: "The Hate U Give",
     author: "Angie Thomas",
-    genre: "Young Adult",
+    genre: "Young Adult Literature, Novel, Fiction",
   },
 
   {
     id: 2,
     title: "Of Mice and Men",
     author: "John Steinbeck",
-    genre: "Fiction/Tragedy",
+    genre: "Tragedy",
   },
 
   {
     id: 3,
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
-    genre: "Fiction/Tragedy/Romance",
+    genre: "Novel, Tragedy, Literary Fiction",
   },
 
   {
     id: 4,
     title: "The Hunger Games",
     author: "Suzanne Collins",
-    genre: "Young Adult",
+    genre: "Novel, Young Adult Literature, Science Fiction",
   },
 
   {
     id: 5,
     title: "The Lightning Thief",
     author: "Rick Riordan",
-    genre: "Fantasy",
+    genre: "Novel, Greek Mythology, Young Adult Literature",
   },
 
   {
     id: 6,
     title: "Sea of Monsters",
     author: "Rick Riordan",
-    genre: "Fantasy",
+    genre: "Greek Mythology, Novel, Fantasy Fiction, Children's Literature, Adventure Fiction, Action Fiction",
   },
 
   {
     id: 7,
     title: "To Kill a Mockingbird",
     author: "Harper Lee",
-    genre: "Fiction",
-  }, // Added missing comma here
+    genre: "Novel, Bildungsroman, Coming-Of-Age Story",
+  },
   
   {
     id: 8,
     title: "The Alchemist",
     author: "Paulo Coelho",
-    genre: "Novel, Drama, Quest", // Fixed typo "genere"
+    genre: "Novel, Drama, Quest, Fantasy Fiction, Bildungsroman, Adventure Fiction", // Fixed typo "genere"
+  },
+
+  {
+    id: 9,
+    title: "The Color Purple"
+    author: "Alice Walker",
+    genere: "Novel, Epistolary Novel, Domestic Fiction",
+  },
+
+  {
+    id: 10,
+    title: "Things Fall Apart",
+    author: "Chinua Achebe",
+    genere: "Historical Fiction,Tragedy",
   }
 ];
 

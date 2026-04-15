@@ -34,7 +34,7 @@ function App() {
           <Route path="/shelves" element={<ShelvesManager />} />
           <Route path="/profile/:userId?" element={<Profile />} />
           <Route path="/settings" element={<SettingPage />} />
-          <Route path="/main> element={<MainPage />} />
+          <Route path="/main>" element={<MainPage />} />
         </Routes>
       </Router>
     </GoogleOAuthProvider>

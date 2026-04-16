@@ -49,74 +49,7 @@ const Notifications = () => {
             setLoading(false);
         }
     };
-    /*
-    const fetchNotifications = async () => {
-        setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-            setLoading(false);
-            return;
-        }
-
-        // STEP 1: Fetch all rows where someone is following YOU
-        const { data: followerData, error: followError } = await supabase
-            .from('Followers')
-            .select('status, follower_id')
-            .eq('following_id', user.id);
-
-        if (followError) {
-            console.error("Follower Fetch Error:", followError.message);
-            setLoading(false);
-            return;
-        }
-
-        if (!followerData || followerData.length === 0) {
-            setNotifications([]);
-            setLoading(false);
-            return;
-        }
-
-        // STEP 2: Get a unique list of IDs of people who followed you
-        const followerIds = [...new Set(followerData.map(f => f.follower_id))];
-
-        // STEP 3: Fetch the profiles for those specific IDs
-        const { data: profileData, error: profileError } = await supabase
-            .from('Profiles')
-            .select('id, username')
-            .in('id', followerIds);
-
-        if (profileError) {
-            console.error("Profile Fetch Error:", profileError.message);
-        }
-
-        // STEP 4: Check if YOU follow them back (for the "Mutual" badge)
-        const { data: followingData } = await supabase
-            .from('Followers')
-            .select('following_id')
-            .eq('follower_id', user.id);
-
-        const followingIds = new Set(followingData?.map(f => f.following_id) || []);
-
-        // STEP 5: Create a map for quick profile lookups
-        const profileMap = Object.fromEntries(
-            profileData?.map(p => [p.id, p.username]) || []
-        );
-
-        // STEP 6: Merge the data back together
-        const formatted = followerData.map((f, index) => ({
-            id: index, // Use index if your table lacks a single 'id' column
-            status: f.status,
-            follower_id: f.follower_id,
-            username: profileMap[f.follower_id] || 'Unknown User',
-            isAlreadyFollowingBack: followingIds.has(f.follower_id)
-        }));
-
-        setNotifications(formatted);
-        setLoading(false);
-    };
-    */
-
+    
     useEffect(() => { 
         fetchNotifications(); 
     }, []);

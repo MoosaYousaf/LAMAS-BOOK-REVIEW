@@ -37,11 +37,6 @@ function Dashboard() {
     syncUserSession();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
-  };
-
   const handleSearch = (query, type) => {
   if (!query) {
     console.warn("Search blocked: Query is empty");
@@ -83,12 +78,6 @@ return (
             ) : (
               <span>Welcome, Guest!</span>
             )}
-          <button
-            onClick={handleLogout}
-            style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
-          >
-            Logout
-          </button>
           </div>
         </header>
         
@@ -101,56 +90,5 @@ return (
   );
 }
 
-/*
-  const location = useLocation();
-  const user = location.state?.user; // Retrieve the user data passed from the LoginPage
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log('Searching for:', searchQuery);
-    // TODO: Implement actual search functionality here later
-  };
-
-  return (
-
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-        <h2>LAMAS BOOK REVIEW</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <button
-          onClick={() => navigate('/shelves')}
-          style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}>
-          My Shelves
-        </button>
-          {user ? (
-            <>
-              <span>Welcome, <strong>{user.name}</strong>!</span>
-              {user.picture && <img src={user.picture} alt="Profile" style={{ width: '40px', borderRadius: '50%' }} />}
-            </>
-          ) : (
-            <span>Welcome, Guest!</span>
-          )}
-        </div>
-      </header>
-
-      <main style={{ marginTop: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <h3>Search Books or Friends</h3>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-          <input
-            type="text"
-            placeholder="Search by title, author, or username..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ padding: '10px', width: '300px', borderRadius: '5px', border: '1px solid #ccc' }}
-          />
-          <button type="submit" style={{ padding: '10px 20px', borderRadius: '5px', background: '#007BFF', color: '#fff', border: 'none', cursor: 'pointer' }}>
-            Search
-          </button>
-        </form>
-      </main>
-    </div>
-  );
-*/
 
 export default Dashboard;

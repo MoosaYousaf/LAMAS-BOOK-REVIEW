@@ -12,8 +12,8 @@ import ResetPasswordPage from './Pages/PasswordRecovery/RecoverPasswordPage';
 import FriendsPage from './Pages/FriendsPage';
 import BookDetailPage from './Pages/BookDetailPage';
 import Profile from './Pages/PersonalAccount/Profile';
-import SettingPage from './Pages/SettingPage';
 import Notifications from './Pages/Notifications';
+import SettingPage from './Pages/SettingPage';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -32,9 +32,9 @@ function App() {
           <Route path="/forgotPassword" element={<ForgotPasswordPage/>} />
           <Route path="/resetPassword" element={<ResetPasswordPage/>} />
           <Route path="/profile/:userId?" element={<Profile />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<SettingPage />} />
           <Route path="/main>" element={<MainPage />} />
-          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </Router>
     </GoogleOAuthProvider>

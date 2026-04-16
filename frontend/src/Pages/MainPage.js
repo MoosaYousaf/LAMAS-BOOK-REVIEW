@@ -61,7 +61,7 @@ const FEATURED_BOOKS = [
 
   {
     id: 9,
-    title: "The Color Purple"
+    title: "The Color Purple",
     author: "Alice Walker",
     genere: "Novel, Epistolary Novel, Domestic Fiction",
   },

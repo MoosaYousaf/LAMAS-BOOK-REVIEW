@@ -13,7 +13,7 @@ function LoginPage() {
       provider: 'google',
       options: {
         // Dashboard will check if the user has a profile record
-        redirectTo: 'http://localhost:3000/dashboard',
+        redirectTo: `${window.location.origin}/dashboard`,
       },
     });
   };

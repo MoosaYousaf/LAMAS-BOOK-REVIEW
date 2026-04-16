@@ -26,55 +26,25 @@ export const SHELVES = [
  * Can be rendered as a full page, or embedded in another page
  * (for example, a user profile/personal account page).
  */
-function ShelvesManager({
-  title = 'My Shelves',
-  onRequireLogin,
-  onBack,
-  showBackButton = true,
-}) {
+function ShelvesManager({ targetUserId, isOwnProfile}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState('Reader');
   const [entries, setEntries] = useState([]);
   const [savingEntryId, setSavingEntryId] = useState(null);
   const [activeShelf, setActiveShelf] = useState('all');
 
-  // Defaults keep the component usable directly as a route element with no wrappers.
-  const handleBack = onBack || (() => navigate('/dashboard'));
-
   useEffect(() => {
     const loadShelves = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      if (!targetUserId) return;
 
-      if (!user) {
-        if (onRequireLogin) onRequireLogin();
-        else navigate('/');
-        return;
-      }
-
-      const profileResponse = await supabase
-        .from('Profiles')
-        .select('username')
-        .eq('id', user.id)
-        .single();
-
-      if (!profileResponse.error && profileResponse.data?.username) {
-        setUsername(profileResponse.data.username);
-      } else {
-        setUsername(user.email || 'Reader');
-      }
-
-      const shelvesResponse = await supabase
+      // Fetch shelves for the specific profile being viewed
+      const { data, error } = await supabase
         .from('UserBookShelves')
         .select(`
           id,
           user_id,
           book_id,
           shelf_slug,
-          created_at,
-          updated_at,
           book:Books (
             id,
             book_title,
@@ -83,33 +53,18 @@ function ShelvesManager({
             image_url_m
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', targetUserId)
         .order('updated_at', { ascending: false });
 
-      if (!shelvesResponse.error && Array.isArray(shelvesResponse.data)) {
-        setEntries(shelvesResponse.data);
-      } else {
-        setEntries([]);
-      }
-
+      if (!error) setEntries(data || []);
       setLoading(false);
     };
 
     loadShelves();
-  }, [navigate, onRequireLogin]);
-
-  const grouped = useMemo(() => {
-    return SHELVES.reduce((acc, shelf) => {
-      acc[shelf.slug] = entries.filter((entry) => entry.shelf_slug === shelf.slug);
-      return acc;
-    }, {});
-  }, [entries]);
-
-  const visibleShelves = activeShelf === 'all'
-    ? SHELVES
-    : SHELVES.filter((shelf) => shelf.slug === activeShelf);
+  }, [targetUserId]);
 
   const handleMove = async (entryId, nextShelf) => {
+    if (!isOwnProfile) return; // Prevent moving if not own profile
     setSavingEntryId(entryId);
 
     const { error } = await supabase
@@ -118,15 +73,14 @@ function ShelvesManager({
       .eq('id', entryId);
 
     if (!error) {
-      setEntries((prev) => prev.map((entry) => (
-        entry.id === entryId ? { ...entry, shelf_slug: nextShelf } : entry
-      )));
+      setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, shelf_slug: nextShelf } : e));
     }
 
     setSavingEntryId(null);
   };
 
   const handleRemove = async (entryId) => {
+    if (!isOwnProfile) return; // Prevent removing if not own profile
     setSavingEntryId(entryId);
 
     const { error } = await supabase
@@ -141,105 +95,67 @@ function ShelvesManager({
     setSavingEntryId(null);
   };
 
+  const grouped = useMemo(() => {
+    return SHELVES.reduce((acc, shelf) => {
+      acc[shelf.slug] = entries.filter((entry) => entry.shelf_slug === shelf.slug);
+      return acc;
+    }, {});
+  }, [entries]);
+
+
   if (loading) {
     return <div style={{ padding: '20px' }}>Loading your shelves...</div>;
-  }
-
-  const totalBooks = entries.length;
+  };
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <div>
-          <h2 style={styles.title}>{title}</h2>
-          <p style={styles.subtitle}>Welcome, <strong>{username}</strong>.</p>
-        </div>
-        {showBackButton && (
-          <button style={styles.buttonSecondary} onClick={handleBack}>
-            Back to Dashboard
-          </button>
-        )}
-      </header>
-
-      <div style={styles.summaryRow}>
-        <span style={styles.summaryPill}>Total books: {totalBooks}</span>
-        {SHELVES.map((shelf) => (
-          <button
+    <div style={{ width: '100%' }}>
+      {/* Filter Row */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <button 
+          onClick={() => setActiveShelf('all')}
+          style={activeShelf === 'all' ? styles.activeFilter : styles.filter}
+        >
+          All ({entries.length})
+        </button>
+        {SHELVES.map(shelf => (
+          <button 
             key={shelf.slug}
             onClick={() => setActiveShelf(shelf.slug)}
-            style={{
-              ...styles.filterButton,
-              ...(activeShelf === shelf.slug ? styles.filterButtonActive : {}),
-            }}
+            style={activeShelf === shelf.slug ? styles.activeFilter : styles.filter}
           >
             {shelf.label} ({(grouped[shelf.slug] || []).length})
           </button>
         ))}
-        <button
-          onClick={() => setActiveShelf('all')}
-          style={{
-            ...styles.filterButton,
-            ...(activeShelf === 'all' ? styles.filterButtonActive : {}),
-          }}
-        >
-          All
-        </button>
       </div>
 
-      <section style={styles.grid}>
-        {visibleShelves.map((shelf) => (
-          <article key={shelf.slug} style={styles.column}>
-            <h3 style={styles.columnTitle}>{shelf.label}</h3>
-            <p style={styles.columnDescription}>{shelf.description}</p>
-
-            {(grouped[shelf.slug] || []).length === 0 ? (
-              <p style={styles.emptyText}>No books in this shelf yet.</p>
-            ) : (
-              <div style={styles.list}>
-                {(grouped[shelf.slug] || []).map((entry) => (
-                  <div key={entry.id} style={styles.bookCard}>
-                    <div style={styles.bookTopRow}>
-                      <img
-                        src={entry.book?.image_url_m || 'https://via.placeholder.com/54x78?text=Book'}
-                        alt={entry.book?.book_title || 'Book cover'}
-                        style={styles.cover}
-                      />
-                      <div>
-                        <h4 style={styles.bookTitle}>{entry.book?.book_title || 'Untitled book'}</h4>
-                        <p style={styles.bookMeta}>{entry.book?.book_author || 'Unknown author'}</p>
-                        {entry.book?.isbn && <p style={styles.bookMeta}>ISBN: {entry.book.isbn}</p>}
-                      </div>
-                    </div>
-
-                    <div style={styles.actionsRow}>
-                      <select
-                        value={entry.shelf_slug}
-                        onChange={(e) => handleMove(entry.id, e.target.value)}
-                        disabled={savingEntryId === entry.id}
-                        style={styles.select}
-                      >
-                        {SHELVES.map((option) => (
-                          <option key={option.slug} value={option.slug}>
-                            Move to: {option.label}
-                          </option>
-                        ))}
-                      </select>
-
-                      <button
-                        onClick={() => handleRemove(entry.id)}
-                        disabled={savingEntryId === entry.id}
-                        style={styles.removeButton}
-                      >
-                        Remove
-                      </button>
-                    </div>
+      {/* Books Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        {entries
+          .filter(e => activeShelf === 'all' || e.shelf_slug === activeShelf)
+          .map(entry => (
+            <div key={entry.id} style={styles.bookCard}>
+              <img src={entry.book?.image_url_m} alt="cover" style={styles.cover} />
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: '0 0 5px' }}>{entry.book?.book_title}</h4>
+                <p style={{ fontSize: '12px', color: '#666' }}>{entry.book?.book_author}</p>
+                
+                {/* Only show management controls if it's the user's own profile */}
+                {isOwnProfile && (
+                  <div style={{ marginTop: '10px', display: 'flex', gap: '5px' }}>
+                    <select 
+                      value={entry.shelf_slug} 
+                      onChange={(e) => handleMove(entry.id, e.target.value)}
+                      style={styles.smallSelect}
+                    >
+                      {SHELVES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
+                    </select>
+                    <button onClick={() => handleRemove(entry.id)} style={styles.deleteBtn}>✕</button>
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </article>
-        ))}
-      </section>
+            </div>
+          ))}
+      </div>
     </div>
   );
 }

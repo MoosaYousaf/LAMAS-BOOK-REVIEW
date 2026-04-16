@@ -3,11 +3,13 @@ import { supabase } from '../Services/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../Components/SearchBar';
 import SidebarNav from '../Components/SidebarNav';
+import ShelvesManager from '../Components/Shelves/ShelvesManager';
 
 function Dashboard() {
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState('search');
 
   useEffect(() => {
     const syncUserSession = async () => {
@@ -70,10 +72,10 @@ return (
         <h2>LAMAS BOOK REVIEW</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <button
-          onClick={() => navigate('/shelves')}
+          onClick={() => setActiveView((prev) => (prev === 'shelves' ? 'search' : 'shelves'))}
           style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
         >
-          My Shelves
+          {activeView === 'shelves' ? 'Back to Search' : 'My Shelves'}
         </button>
           {userProfile ? (
             <>
@@ -92,9 +94,18 @@ return (
           </div>
         </header>
         
-        <main style={{ marginTop: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h3>Search Books or Users</h3>
-            <SearchBar onSearch={handleSearch} />
+        <main style={{ marginTop: '30px' }}>
+          {activeView === 'shelves' ? (
+            <div>
+              <h3 style={{ marginBottom: '12px' }}>My Shelves</h3>
+              <ShelvesManager targetUserId={userProfile?.id} isOwnProfile />
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+              <h3>Search Books or Users</h3>
+              <SearchBar onSearch={handleSearch} />
+            </div>
+          )}
         </main>
       </div>
     </div>

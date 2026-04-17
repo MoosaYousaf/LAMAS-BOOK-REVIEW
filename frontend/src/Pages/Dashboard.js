@@ -52,7 +52,7 @@ function Dashboard() {
 
 /*
 *
-*  I figure when we get into the design phase, instead of a blank screen with "syncing session...""
+*  I figure when we get into the design phase, instead of a blank screen with "syncing session..."
 *  we can do some design instead, could be like an open book with pages turning, that way it ties to the
 *  idea of the project; then we can place this everywhere
 */
@@ -102,54 +102,4 @@ return (
 }
 
 
-<<<<<<< HEAD
-=======
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log('Searching for:', searchQuery);
-    // TODO: Implement actual search functionality here later
-  };
-
-  return (
-
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-        <h2>LAMAS BOOK REVIEW</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <button
-          onClick={() => navigate('/shelves')}
-          style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}>
-          My Shelves
-        </button>
-          {user ? (
-            <>
-              <span>Welcome, <strong>{user.name}</strong>!</span>
-              {user.picture && <img src={user.picture} alt="Profile" style={{ width: '40px', borderRadius: '50%' }} />}
-            </>
-          ) : (
-            <span>Welcome, Guest!</span>
-          )}
-        </div>
-      </header>
-
-      <main style={{ marginTop: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <h3>Search Books or Friends</h3>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-          <input
-            type="text"
-            placeholder="Search by title, author, or username..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ padding: '10px', width: '300px', borderRadius: '5px', border: '1px solid #ccc' }}
-          />
-          <button type="submit" style={{ padding: '10px 20px', borderRadius: '5px', background: '#007BFF', color: '#fff', border: 'none', cursor: 'pointer' }}>
-            Search
-          </button>
-        </form>
-      </main>
-    </div>
-  );
-*/
-
->>>>>>> 888171419c731b99c4544d4c02200585568b04c0
 export default Dashboard;

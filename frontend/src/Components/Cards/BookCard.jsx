@@ -1,7 +1,7 @@
 const BookCard = ({ book }) => (
     <div style={{
         border: '1px solid #ddd',
-        borderRadies: '8px',
+        borderRadius: '8px',
         padding: '15px',
         width: '200px',
         textAlign: 'center',

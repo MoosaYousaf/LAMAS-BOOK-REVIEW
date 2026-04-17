@@ -113,9 +113,19 @@ function Profile() {
         </div>
     );
 
+    // Profile.js updates
     const profileTabs = [
         { label: 'Reviews', content: <ReviewList userId={profile?.id} /> },
-        { label: 'Shelves', content: ( <ShelvesManager targetUserId={profile?.id} isOwnProfile={isOwnProfile} /> ) }
+        { 
+            label: 'Shelves', 
+            content: (
+                <ShelvesManager 
+                    targetUserId={profile?.id} 
+                    isOwnProfile={isOwnProfile} 
+                    canViewContent={canViewContent} 
+                />
+            ) 
+        }
     ];
 
     return (

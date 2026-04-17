@@ -52,7 +52,7 @@ function Dashboard() {
 
 /*
 *
-*  I figure when we get into the design phase, instead of a blank screen with "syncing session...""
+*  I figure when we get into the design phase, instead of a blank screen with "syncing session..."
 *  we can do some design instead, could be like an open book with pages turning, that way it ties to the
 *  idea of the project; then we can place this everywhere
 */

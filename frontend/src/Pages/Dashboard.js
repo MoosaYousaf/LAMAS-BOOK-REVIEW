@@ -48,6 +48,42 @@ function Dashboard() {
   const url = `/search?q=${encodeURIComponent(query)}&type=${type}`;
   navigate(url);
 };
+const handleFeelingLucky = async () => {
+  try {
+    const { count, error: countError } = await supabase
+      .from('Books') // <-- CHANGE THIS to your actual table name
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error("Error fetching book count:", countError);
+      return;
+    }
+
+    if (count && count > 0) {
+      //Pick a random index based on the total count
+      const randomIndex = Math.floor(Math.random() * count);
+
+      //Fetch just the book_title at that specific index
+      const { data, error } = await supabase
+        .from('Books')
+        .select('book_title')
+        .range(randomIndex, randomIndex)
+        .single();
+
+      if (error) {
+        console.error("Error fetching lucky book:", error);
+        return;
+      }
+
+      if (data?.book_title) {
+        //Send the random title to your existing search handler
+        handleSearch(data.book_title, 'books'); 
+      }
+    }
+  } catch (err) {
+    console.error("Unexpected error in feeling lucky:", err);
+  }
+};
 
 
 /*
@@ -93,6 +129,24 @@ return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
               <h3>Search Books or Users</h3>
               <SearchBar onSearch={handleSearch} />
+              
+              <button
+                onClick={handleFeelingLucky}
+                style={{
+                  marginTop: '15px',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #ddd',
+                  background: '#f8f9fa',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.background = '#e2e6ea'}
+                onMouseOut={(e) => e.target.style.background = '#f8f9fa'}
+              >
+                I'm Feeling Lucky 🎲
+              </button>
             </div>
           )}
         </main>

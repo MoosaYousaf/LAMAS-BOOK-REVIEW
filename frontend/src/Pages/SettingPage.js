@@ -10,6 +10,7 @@ function SettingPage() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [passwordMsg, setPasswordMsg] = useState('');
@@ -139,6 +140,23 @@ function SettingPage() {
     }
 
     setSavingPassword(false);
+  };
+
+  const handleLogout = async () => {
+    setErrorMsg('');
+    setSuccessMsg('');
+    setPasswordMsg('');
+    setLoggingOut(true);
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      setErrorMsg(`Unable to log out: ${error.message}`);
+      setLoggingOut(false);
+      return;
+    }
+
+    navigate('/');
   };
 
   const handleAvatarUploaded = async (avatarUrl) => {
@@ -291,6 +309,19 @@ function SettingPage() {
             {savingPassword ? 'Updating...' : 'Update Password'}
           </button>
         </form>
+
+        <section style={styles.card}>
+          <h2 style={styles.sectionTitle}>Session</h2>
+          <p style={styles.helpText}>Sign out of your account on this device.</p>
+          <button
+            type="button"
+            style={styles.logoutBtn}
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            {loggingOut ? 'Logging out...' : 'Log Out'}
+          </button>
+        </section>
       </main>
     </div>
   );
@@ -315,6 +346,7 @@ const styles = {
   checkboxLabel: { fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '6px' },
   submitBtn: { padding: '12px', backgroundColor: '#222', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', marginTop: '6px', fontWeight: 'bold' },
   secondaryBtn: { padding: '8px 12px', border: '1px solid #ccc', borderRadius: '5px', background: '#fff', cursor: 'pointer', width: 'fit-content' },
+  logoutBtn: { padding: '12px', backgroundColor: '#8b0000', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', marginTop: '6px', fontWeight: 'bold', width: 'fit-content' },
   error: { color: '#8b0000', backgroundColor: '#ffe6e6', padding: '10px', borderRadius: '6px', maxWidth: '560px' },
   success: { color: '#155724', backgroundColor: '#d4edda', padding: '10px', borderRadius: '6px', maxWidth: '560px' },
   info: { color: '#333', backgroundColor: '#f4f4f4', padding: '8px', borderRadius: '6px', fontSize: '13px' },

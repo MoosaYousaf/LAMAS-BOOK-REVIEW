@@ -7,6 +7,7 @@ import UserPeronalDataCard from '../../Components/Cards/UserPersonalDataCard';
 import TabSystem from '../../Components/TabSystem';
 import ReviewList from '../../Components/ReviewList';
 import ShelvesManager from '../../Components/Shelves/ShelvesManager';
+import CreateReviewPanel from '../../Components/CreateReviewPanel';
 
 function Profile() {
     const { userId } = useParams();
@@ -15,6 +16,10 @@ function Profile() {
     const [currentUser, setCurrentUser] = useState(null);
     const [followStatus, setFollowStatus] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
+
+    const [relationshipModal, setRelationshipModal] = useState({ open: false, mode: 'followers' });
+    const [relationshipRows, setRelationshipRows] = useState([]);
 
     const isOwnProfile = !userId || userId === currentUser?.id;
 
@@ -25,7 +30,6 @@ function Profile() {
         const targetId = userId || user?.id;
         if (!targetId) return;
 
-        // Fetching profile with count columns from DB
         const { data: profileData, error: profileError } = await supabase
             .from('Profiles')
             .select('*')
@@ -38,7 +42,6 @@ function Profile() {
         }
         setProfile(profileData);
 
-        // Fetch follow relationship status
         if (user && targetId !== user.id) {
             const { data: followEntry } = await supabase
                 .from('Followers')
@@ -57,20 +60,17 @@ function Profile() {
 
     const handleFollowToggle = async () => {
         if (!currentUser || !profile) return;
-        
-        const isCurrentlyFollowing = followStatus !== null;
-        const previousStatus = followStatus; // Store to revert if DB fails
 
-        // 1. Logic: Determine new status
+        const isCurrentlyFollowing = followStatus !== null;
+        const previousStatus = followStatus;
+
         const isTargetPrivate = profile.is_private === true;
         const newStatus = isCurrentlyFollowing ? null : (isTargetPrivate ? 'pending' : 'accepted');
 
-        // 2. Optimistic UI: Update state immediately so the button changes instantly
         setFollowStatus(newStatus);
 
         try {
             if (isCurrentlyFollowing) {
-                // UNFOLLOW
                 const { error } = await supabase
                     .from('Followers')
                     .delete()
@@ -78,23 +78,20 @@ function Profile() {
                     .eq('following_id', profile.id);
                 if (error) throw error;
             } else {
-                // FOLLOW
                 const { error } = await supabase
                     .from('Followers')
-                    .insert([{ 
-                        follower_id: currentUser.id, 
-                        following_id: profile.id, 
-                        status: newStatus 
+                    .insert([{
+                        follower_id: currentUser.id,
+                        following_id: profile.id,
+                        status: newStatus
                     }]);
                 if (error) throw error;
             }
 
-            // 3. Refresh profile to get the updated counts from the SQL trigger
             await fetchProfileData();
 
         } catch (error) {
             console.error("Follow action failed:", error.message);
-            // Revert UI if the database action failed
             setFollowStatus(previousStatus);
             alert(`Action failed: ${error.message}`);
         }
@@ -104,27 +101,65 @@ function Profile() {
         navigate(`/search?q=${encodeURIComponent(query)}&type=${type}`);
     };
 
-    // Privacy Check Logic
+    const openRelationshipList = async (mode) => {
+        if (!profile?.id) return;
+        setRelationshipModal({ open: true, mode });
+
+        const column = mode === 'followers' ? 'following_id' : 'follower_id';
+        const profileIdField = mode === 'followers' ? 'follower_id' : 'following_id';
+
+        const { data: rows } = await supabase
+            .from('Followers')
+            .select('follower_id, following_id, status')
+            .eq(column, profile.id)
+            .eq('status', 'accepted');
+
+        const ids = (rows || []).map((row) => row[profileIdField]);
+        if (ids.length === 0) {
+            setRelationshipRows([]);
+            return;
+        }
+
+        const { data: profiles } = await supabase
+            .from('Profiles')
+            .select('id, username, avatar_url, bio')
+            .in('id', ids);
+
+        setRelationshipRows(profiles || []);
+    };
+
     const canViewContent = isOwnProfile || !profile?.is_private || followStatus === 'accepted';
-    
+
     if (loading) return (
         <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
             Syncing Profile...
         </div>
     );
 
-    // Profile.js updates
     const profileTabs = [
-        { label: 'Reviews', content: <ReviewList userId={profile?.id} /> },
-        { 
-            label: 'Shelves', 
+        {
+            label: 'Reviews',
             content: (
-                <ShelvesManager 
-                    targetUserId={profile?.id} 
-                    isOwnProfile={isOwnProfile} 
-                    canViewContent={canViewContent} 
+                <>
+                    {isOwnProfile && (
+                        <CreateReviewPanel
+                            userId={profile?.id}
+                            onReviewCreated={() => setReviewRefreshKey((prev) => prev + 1)}
+                        />
+                    )}
+                    <ReviewList userId={profile?.id} refreshKey={reviewRefreshKey} />
+                </>
+            )
+        },
+        {
+            label: 'Shelves',
+            content: (
+                <ShelvesManager
+                    targetUserId={profile?.id}
+                    isOwnProfile={isOwnProfile}
+                    canViewContent={canViewContent}
                 />
-            ) 
+            )
         }
     ];
 
@@ -143,18 +178,20 @@ function Profile() {
                         isOwnProfile={isOwnProfile}
                         followStatus={followStatus}
                         onFollowAction={handleFollowToggle}
+                        onFollowersClick={() => openRelationshipList('followers')}
+                        onFollowingClick={() => openRelationshipList('following')}
                     />
 
                     <div style={{ marginTop: '30px' }}>
                         {canViewContent ? (
                             <TabSystem tabs={profileTabs} />
                         ) : (
-                            <div style={{ 
-                                textAlign: 'center', 
-                                padding: '80px 20px', 
-                                border: '1px solid #eee', 
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '80px 20px',
+                                border: '1px solid #eee',
                                 borderRadius: '12px',
-                                backgroundColor: '#fafafa' 
+                                backgroundColor: '#fafafa'
                             }}>
                                 <h3 style={{ color: '#333' }}>This Account is Private</h3>
                                 <p style={{ color: '#666' }}>Follow this user to see their reviews and shelves.</p>
@@ -163,8 +200,79 @@ function Profile() {
                     </div>
                 </main>
             </div>
+
+            {relationshipModal.open && (
+                <div style={styles.overlay} onClick={() => setRelationshipModal({ open: false, mode: 'followers' })}>
+                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <h3 style={{ marginTop: 0 }}>
+                            {relationshipModal.mode === 'followers' ? 'Followers' : 'Following'}
+                        </h3>
+
+                        {relationshipRows.length === 0 ? (
+                            <p style={{ color: '#777' }}>No users found.</p>
+                        ) : (
+                            relationshipRows.map((row) => (
+                                <button
+                                    key={row.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setRelationshipModal({ open: false, mode: 'followers' });
+                                        navigate(`/profile/${row.id}`);
+                                    }}
+                                    style={styles.personRow}
+                                >
+                                    <img
+                                        src={row.avatar_url || 'https://via.placeholder.com/44'}
+                                        alt={row.username}
+                                        style={styles.avatar}
+                                    />
+                                    <div style={{ textAlign: 'left' }}>
+                                        <div style={{ fontWeight: 600 }}>{row.username}</div>
+                                        <div style={{ fontSize: '12px', color: '#666' }}>{row.bio || 'No bio yet.'}</div>
+                                    </div>
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
+const styles = {
+    overlay: {
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.35)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 100,
+    },
+    modal: {
+        width: '100%',
+        maxWidth: '420px',
+        maxHeight: '70vh',
+        overflowY: 'auto',
+        background: '#fff',
+        borderRadius: '10px',
+        padding: '16px',
+        boxShadow: '0 12px 24px rgba(0,0,0,0.18)',
+    },
+    personRow: {
+        width: '100%',
+        border: '1px solid #eee',
+        background: '#fff',
+        borderRadius: '8px',
+        marginBottom: '8px',
+        padding: '10px',
+        display: 'flex',
+        gap: '10px',
+        alignItems: 'center',
+        cursor: 'pointer',
+    },
+    avatar: { width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover' },
+};
 
 export default Profile;

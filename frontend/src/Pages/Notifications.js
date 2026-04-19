@@ -22,7 +22,16 @@ const Notifications = () => {
                 supabase.from('Followers').select('following_id').eq('follower_id', user.id)
             ]);
 
-            if (received.error || !received.data.length) return setNotifications([]);
+            if (received.error) {
+                console.error('Error loading received follows:', received.error);
+                return setNotifications([]);
+            }
+
+            if (sent.error) {
+                console.error('Error loading sent follows:', sent.error);
+            }
+
+            if (!received.data.length) return setNotifications([]);
 
             const followingIds = new Set(sent.data?.map(f => f.following_id));
             const uniqueFollowers = [...new Set(received.data.map(f => f.follower_id))];
@@ -37,7 +46,7 @@ const Notifications = () => {
 
             // Assemble notifications
             setNotifications(received.data.map((f, i) => ({
-                id: f.id || i,
+                id: `${f.follower_id}-${i}`,
                 ...f,
                 username: profileMap[f.follower_id] || 'Unknown User',
                 isAlreadyFollowingBack: followingIds.has(f.follower_id)
@@ -92,7 +101,8 @@ const Notifications = () => {
                                 <NotificationRow 
                                     key={n.id} 
                                     notification={n} 
-                                    refresh={fetchNotifications} 
+                                    refresh={fetchNotifications}
+                                    onOpenProfile={(id) => navigate(`/profile/${id}`)}
                                 />
                             ))
                         ) : (

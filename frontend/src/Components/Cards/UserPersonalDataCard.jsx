@@ -1,6 +1,6 @@
 import React from 'react';
 
-const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus, onFollowAction }) => {
+const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus, onFollowAction, onFollowersClick, onFollowingClick }) => {
 
     const getButtonContent = () => {
         if (followStatus === 'accepted') return { text: 'Unfollow', color: '#e0e0e0', textColor: '#333' };
@@ -30,8 +30,8 @@ const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus, onFollowAct
                 <p style={{ color: '#666', margin: '0 0 15px 0' }}>{profile?.bio}</p>
                 
                 <div style={{ display: 'flex', gap: '25px' }}>
-                    <span><strong>{profile?.follower_count || 0}</strong> Followers</span>
-                    <span><strong>{profile?.following_count || 0}</strong> Following</span>
+                    <button type="button" onClick={onFollowersClick} style={styles.countButton}><strong>{profile?.follower_count || 0}</strong> Followers</button>
+                    <button type="button" onClick={onFollowingClick} style={styles.countButton}><strong>{profile?.following_count || 0}</strong> Following</button>
                 </div>
             </div>
 
@@ -55,6 +55,16 @@ const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus, onFollowAct
             )}
         </div>
     );
+};
+
+const styles = {
+    countButton: {
+        border: 'none',
+        background: 'transparent',
+        padding: 0,
+        cursor: 'pointer',
+        fontSize: '16px'
+    }
 };
 
 export default UserPersonalDataCard;

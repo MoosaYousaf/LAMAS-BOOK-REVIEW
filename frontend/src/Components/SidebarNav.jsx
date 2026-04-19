@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../Services/supabaseClient';
-import { IoPersonCircleOutline, IoNotificationsCircle } from 'react-icons/io5';
+import { IoPersonCircleOutline } from 'react-icons/io5';
 
 function SidebarNav() {
   const navigate = useNavigate();
@@ -16,16 +16,16 @@ function SidebarNav() {
     getSession();
   }, []);
 
-  // Keep this limited to non-auth flows (no signup/reset pages).
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Dashboard', path: '/dashboard', state: { openShelves: false } },
+    { label: 'Shelves', path: '/dashboard', state: { openShelves: true } },
     { label: 'Friends', path: '/friends' },
     { label: 'Settings', path: '/settings' },
   ];
 
   const goToMyProfile = () => {
     if (myId) navigate(`/profile/${myId}`);
-  }
+  };
 
   return (
     <aside
@@ -37,19 +37,18 @@ function SidebarNav() {
         boxSizing: 'border-box',
       }}
     >
-
-
-      {/* Top Section: Main Menu */}
       <div>
         <div style={{ fontWeight: 700, marginBottom: '12px' }}>MENU</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isShelvesActive = item.label === 'Shelves' && location.pathname === '/dashboard' && location.state?.openShelves;
+            const isActive = isShelvesActive || (location.pathname === item.path && item.label !== 'Shelves');
+
             return (
               <button
-                key={item.path}
+                key={item.label}
                 type="button"
-                onClick={() => navigate(item.path, { state: location.state })}
+                onClick={() => navigate(item.path, { state: item.state ?? location.state })}
                 style={{
                   padding: '8px 10px',
                   border: '1px solid #ccc',
@@ -65,63 +64,40 @@ function SidebarNav() {
         </div>
       </div>
 
-      {/* Personal Notification & Account Button */}
-      <div style={{ 
-        borderTop: '1px solid #eee', 
-        paddingTop: '15px', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        gap: '10px' 
+      <div style={{
+        borderTop: '1px solid #eee',
+        paddingTop: '15px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '10px'
       }}>
-
-        {/* Notifications Button */}
-        <button
-          onClick={() => navigate('/notifications')}
-          title="Notifications"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '5px',
-            display: 'flex',
-            justifyContent: 'center',
-            transition: 'transform 0.1s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <IoNotificationsCircle 
-            size={32} 
-            color={location.pathname === '/notifications' ? '#007bff' : '#555'} 
-          />
-        </button>
-
-        {/* Profile Button */}
         <button
           onClick={goToMyProfile}
           title="My Profile"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '10px',
-            display: 'flex',
-            justifyContent: 'center',
-            width: '100%'
-          }}
+          style={{ ...iconBtnStyle, width: '100%', padding: '10px' }}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <IoPersonCircleOutline 
-            size={40} 
-            color={location.pathname.includes(myId) && myId !== null ? '#007bff' : '#555'} 
+          <IoPersonCircleOutline
+            size={40}
+            color={location.pathname.includes(myId) && myId !== null ? '#007bff' : '#555'}
           />
         </button>
       </div>
     </aside>
   );
 }
+
+const iconBtnStyle = {
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: '5px',
+  display: 'flex',
+  justifyContent: 'center',
+  transition: 'transform 0.1s'
+};
 
 export default SidebarNav;
 

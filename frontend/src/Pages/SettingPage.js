@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SidebarNav from '../Components/SidebarNav';
 import { supabase } from '../Services/supabaseClient';
+import AvatarUpload from '../Components/AvatarUpload';
 
 function SettingPage() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ function SettingPage() {
     full_name: '',
     bio: '',
     is_private: false,
+    avatar_url: '',
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -36,7 +38,7 @@ function SettingPage() {
 
       const { data, error } = await supabase
         .from('Profiles')
-        .select('username, full_name, bio, is_private')
+        .select('username, full_name, bio, is_private, avatar_url')
         .eq('id', user.id)
         .single();
 
@@ -48,6 +50,7 @@ function SettingPage() {
           full_name: data?.full_name || '',
           bio: data?.bio || '',
           is_private: !!data?.is_private,
+          avatar_url: data?.avatar_url || '',
         });
       }
 
@@ -73,6 +76,7 @@ function SettingPage() {
 
     if (!user) {
       setErrorMsg('No active session found. Please sign in again.');
+
       setSavingProfile(false);
       return;
     }
@@ -137,6 +141,46 @@ function SettingPage() {
     setSavingPassword(false);
   };
 
+  const handleAvatarUploaded = async (avatarUrl) => {
+    setProfile((prev) => ({ ...prev, avatar_url: avatarUrl }));
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('Profiles')
+      .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+
+    if (error) {
+      setErrorMsg(`Avatar upload succeeded but profile update failed: ${error.message}`);
+    } else {
+      setSuccessMsg('Profile picture updated.');
+    }
+  };
+
+
+  const handleAvatarRemove = async () => {
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    setProfile((prev) => ({ ...prev, avatar_url: '' }));
+
+    const { error } = await supabase
+      .from('Profiles')
+      .update({ avatar_url: null, updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+
+    if (error) {
+      setErrorMsg(`Error removing profile picture: ${error.message}`);
+    } else {
+      setSuccessMsg('Profile picture removed.');
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: '20px' }}>Loading settings...</div>;
   }
@@ -153,6 +197,19 @@ function SettingPage() {
 
         <form onSubmit={handleProfileSave} style={styles.card}>
           <h2 style={styles.sectionTitle}>Profile Settings</h2>
+
+          <AvatarUpload
+            currentImageUrl={profile.avatar_url}
+            onUploadSuccess={handleAvatarUploaded}
+          />
+
+          <button
+            type="button"
+            onClick={handleAvatarRemove}
+            style={styles.secondaryBtn}
+          >
+            Remove Photo
+          </button>
 
           <label style={styles.label}>Username</label>
           <input
@@ -257,6 +314,7 @@ const styles = {
   charCount: { fontSize: '12px', color: '#666', textAlign: 'right', margin: 0 },
   checkboxLabel: { fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '6px' },
   submitBtn: { padding: '12px', backgroundColor: '#222', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', marginTop: '6px', fontWeight: 'bold' },
+  secondaryBtn: { padding: '8px 12px', border: '1px solid #ccc', borderRadius: '5px', background: '#fff', cursor: 'pointer', width: 'fit-content' },
   error: { color: '#8b0000', backgroundColor: '#ffe6e6', padding: '10px', borderRadius: '6px', maxWidth: '560px' },
   success: { color: '#155724', backgroundColor: '#d4edda', padding: '10px', borderRadius: '6px', maxWidth: '560px' },
   info: { color: '#333', backgroundColor: '#f4f4f4', padding: '8px', borderRadius: '6px', fontSize: '13px' },

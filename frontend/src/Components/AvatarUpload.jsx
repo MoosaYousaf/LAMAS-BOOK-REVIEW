@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../Services/supabaseClient';
 
 function AvatarUpload ({ onUploadSuccess, currentImageUrl }) {
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(currentImageUrl || null);
+
+    useEffect(() => {
+        setPreviewUrl(currentImageUrl || null);
+    }, [currentImageUrl]);
 
     const handleImageChange = async (e) => {
         const file = e.target.files[0];

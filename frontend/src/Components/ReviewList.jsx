@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../Services/supabaseClient';
 import UserReviewCard from './Cards/UserReviewCard';
 
-const ReviewList = ({ userId }) => {
+const ReviewList = ({ userId, refreshKey = 0 }) => {
     const [ reviews, setReviews ] = useState([]);
     const [ limit, setLimit ] = useState(5);
     const [ hasMore, setHasMore ] = useState(true);
@@ -25,8 +25,7 @@ const ReviewList = ({ userId }) => {
         };
 
         fetchReviews();
-    }, [userId, limit]);
-
+    }, [userId, limit, refreshKey]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -38,7 +37,7 @@ const ReviewList = ({ userId }) => {
                             bookTitle={rev.Books?.book_title}
                             author={rev.Books?.book_author}
                             coverImg={rev.Books?.book_cover_url}
-                            reviewText = {rev.review_text}
+                            reviewText = {rev.content || rev.review_text}
                         />
                     ))}
                     {hasMore && (

@@ -1,28 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../Services/supabaseClient';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { IoNotificationsCircle } from 'react-icons/io5';
 import SearchBar from '../Components/SearchBar';
 import SidebarNav from '../Components/SidebarNav';
-import ShelvesManager from '../Components/Shelves/ShelvesManager';
 import BookCard from '../Components/Cards/BookCard';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [userProfile, setUserProfile] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState(location.state?.openShelves ? 'shelves' : 'search');
   const [booksOfTheWeek, setBooksOfTheWeek] = useState([]);
   const [booksLoading, setBooksLoading] = useState(false);
-
-  useEffect(() => {
-    if (location.state?.openShelves) {
-      setActiveView('shelves');
-    } else {
-      setActiveView('search');
-    }
-  }, [location.state]);
 
   const fetchBooksOfTheWeek = useCallback(async () => {
     setBooksLoading(true);
@@ -37,7 +26,8 @@ function Dashboard() {
       return;
     }
 
-    const sampleSize = Math.min(10, count);
+    // UPDATED: Changed sample size to 12
+    const sampleSize = Math.min(12, count);
     const chosenIndexes = new Set();
 
     while (chosenIndexes.size < sampleSize) {
@@ -167,68 +157,75 @@ function Dashboard() {
         </header>
 
         <main style={{ marginTop: '30px' }}>
-          {activeView === 'shelves' ? (
-            <div>
-              <h3 style={{ marginBottom: '12px' }}>Shelves</h3>
-              <ShelvesManager targetUserId={userProfile?.id} isOwnProfile />
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
-              <h3>Search Books or Users</h3>
-              <SearchBar onSearch={handleSearch} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+            <h3>Search Books or Users</h3>
+            <SearchBar onSearch={handleSearch} />
 
-              <button
-                onClick={handleFeelingLucky}
-                style={{
-                  marginTop: '15px',
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  border: '1px solid #ddd',
-                  background: '#f8f9fa',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  transition: 'background 0.2s'
-                }}
-                onMouseOver={(e) => e.target.style.background = '#e2e6ea'}
-                onMouseOut={(e) => e.target.style.background = '#f8f9fa'}
-              >
-                I'm Feeling Lucky 🎲
-              </button>
+            <button
+              onClick={handleFeelingLucky}
+              style={{
+                marginTop: '15px',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: '1px solid #ddd',
+                background: '#f8f9fa',
+                cursor: 'pointer',
+                fontSize: '14px',
+                transition: 'background 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.background = '#e2e6ea'}
+              onMouseOut={(e) => e.target.style.background = '#f8f9fa'}
+            >
+              I'm Feeling Lucky 🎲
+            </button>
 
-              <div style={{ marginTop: '30px', width: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ margin: 0 }}>Books of the Week</h3>
-                  <button
-                    type="button"
-                    onClick={fetchBooksOfTheWeek}
-                    style={{ border: '1px solid #ddd', background: '#fff', borderRadius: '16px', padding: '8px 14px', cursor: 'pointer' }}
-                    disabled={booksLoading}
-                  >
-                    {booksLoading ? 'Shuffling...' : 'Shuffle Picks'}
-                  </button>
-                </div>
-
-                {booksLoading ? (
-                  <p>Loading books...</p>
-                ) : booksOfTheWeek.length === 0 ? (
-                  <p style={{ color: '#777' }}>No books available to feature.</p>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginTop: '12px' }}>
-                    {booksOfTheWeek.map((book) => (
-                      <button
-                        key={book.isbn}
-                        type="button"
-                        onClick={() => navigate(`/book/${book.isbn}`, { state: { book } })}
-                        style={{ border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', padding: 0 }}
-                      >
-                        <BookCard book={book} />
-                      </button>
-                    ))}
-                  </div>
-                )}
+            {/* UPDATED: Increased maxWidth to 1600px for a wider container */}
+            <div style={{ 
+                marginTop: '50px', 
+                width: '100%', 
+                maxWidth: '1600px', 
+                padding: '24px', 
+                border: '1px solid #ccc', 
+                borderRadius: '12px', 
+                backgroundColor: '#fff' 
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ margin: 0 }}>Explore New Titles</h3>
+                <button
+                  type="button"
+                  onClick={fetchBooksOfTheWeek}
+                  style={{ border: '1px solid #ddd', background: '#fff', borderRadius: '16px', padding: '8px 14px', cursor: 'pointer' }}
+                  disabled={booksLoading}
+                >
+                  {booksLoading ? 'Shuffling...' : 'Shuffle Picks'}
+                </button>
               </div>
+
+              {booksLoading ? (
+                <p>Loading books...</p>
+              ) : booksOfTheWeek.length === 0 ? (
+                <p style={{ color: '#777' }}>No books available to feature.</p>
+              ) : (
+                <div style={{ 
+                    display: 'grid', 
+                    // Adjusted minmax and gap to handle 12 items comfortably
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
+                    gap: '30px' 
+                }}>
+                  {booksOfTheWeek.map((book) => (
+                    <button
+                      key={book.isbn}
+                      type="button"
+                      onClick={() => navigate(`/book/${book.isbn}`, { state: { book } })}
+                      style={{ border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', padding: 0 }}
+                    >
+                      <BookCard book={book} />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </main>
       </div>
     </div>

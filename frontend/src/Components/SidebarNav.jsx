@@ -21,6 +21,7 @@ function SidebarNav() {
     { label: 'Shelves', path: '/dashboard', state: { openShelves: true } },
     { label: 'Friends', path: '/friends' },
     { label: 'Settings', path: '/settings' },
+    { label: 'Notifications', path: '/notifications'},
   ];
 
   const goToMyProfile = () => {

@@ -1,46 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SidebarNav from '../Components/SidebarNav';
-import UserCard from '../Components/Cards/UserCard';
 import { supabase } from '../Services/supabaseClient';
+import ReviewModal from '../Components/Reviews/ReviewModal';
+import ReviewDetailModal from '../Components/Reviews/ReviewDetailModal';
 
 function BookDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isbn } = useParams();
 
-  // --- UPDATED DATA LOGIC ---
-  // Initial state uses navigation state if available, otherwise null
+  // --- DATA LOGIC ---
   const [bookData, setBookData] = useState(location.state?.book || null);
   const bookIsbn = bookData?.isbn || isbn;
 
-  // Use bookData for the UI fields
   const title = bookData?.book_title || bookData?.title || 'Loading...';
   const author = bookData?.book_author || bookData?.author || 'Loading author...';
   const cover = bookData?.image_url_l || bookData?.image_url_m || bookData?.image_url_s || 'https://via.placeholder.com/150x200?text=No+Image';
   const description = bookData?.description || bookData?.book_description || bookData?.summary || 'No description available.';
 
-  // State for Reviews
+  // --- STATE FOR REVIEWS ---
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
-  const [reviewsError, setReviewsError] = useState('');
+  
+  // --- STATE FOR MODALS ---
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null); 
 
-  // State for Current User and Review Form
-  const [currentUser, setCurrentUser] = useState(null);
-  const [reviewText, setReviewText] = useState('');
-  const [reviewRating, setReviewRating] = useState(5);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-
-  // --- NEW STATE FOR SHELVES ---
+  // --- STATE FOR SHELVES ---
   const [myShelves, setMyShelves] = useState([]);
   const [showShelfSelector, setShowShelfSelector] = useState(false);
   const [isHoveringX, setIsHoveringX] = useState(null); 
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // --- EFFECT: FETCH BOOK INFO IF STATE IS MISSING ---
+  // --- EFFECTS ---
   useEffect(() => {
     const fetchBookInfo = async () => {
-      // If we don't have book data yet (e.g. navigation from list/URL refresh)
       if (!bookData && isbn) {
         const { data, error } = await supabase
           .from('Books')
@@ -99,47 +94,32 @@ function BookDetailPage() {
 
   const isInAnyShelf = myShelves.some(list => !list.isPlaceholder && list.ListEntries?.some(e => e.isbn === bookIsbn));
 
+  // --- FETCH REVIEWS LOGIC ---
   const fetchReviews = async () => {
     if (!bookIsbn) return;
     setLoadingReviews(true);
-    const { data: reviewData, error: reviewError } = await supabase
+    
+    // Fetch reviews with joined profile data
+    const { data, error } = await supabase
       .from('Reviews')
-      .select('id, rating, content, created_at, user_id')
+      .select(`
+        id, 
+        rating, 
+        content, 
+        created_at, 
+        user_id,
+        profiles:user_id (id, username, avatar_url)
+      `)
       .eq('book_id', bookIsbn)
       .order('created_at', { ascending: false });
 
-    if (reviewError) {
-      setReviewsError(reviewError.message);
-      setLoadingReviews(false);
-      return;
+    if (!error) {
+      setReviews(data || []);
     }
-
-    const userIds = [...new Set((reviewData || []).map((r) => r.user_id).filter(Boolean))];
-    if (userIds.length === 0) {
-      setReviews(reviewData || []);
-      setLoadingReviews(false);
-      return;
-    }
-
-    const { data: profileData } = await supabase.from('Profiles').select('id, username, avatar_url').in('id', userIds);
-    const profileMap = {};
-    (profileData || []).forEach(p => profileMap[p.id] = p);
-    setReviews((reviewData || []).map(r => ({ ...r, profiles: profileMap[r.user_id] || null })));
     setLoadingReviews(false);
   };
 
   useEffect(() => { fetchReviews(); }, [bookIsbn]);
-
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    setSubmitting(true);
-    const { error } = await supabase.from('Reviews').insert({
-      book_id: bookIsbn, user_id: currentUser.id, rating: reviewRating, content: reviewText,
-    });
-    setSubmitting(false);
-    if (!error) { setReviewText(''); setReviewRating(5); fetchReviews(); }
-  };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -215,32 +195,67 @@ function BookDetailPage() {
           </div>
         </div>
 
+        {/* --- REFACTORED REVIEW SECTION --- */}
         <div style={styles.reviewsContainer}>
-          <h3 style={{ margin: '0 0 12px' }}>Reviews</h3>
-          {currentUser && (
-            <form onSubmit={handleSubmitReview} style={styles.reviewForm}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <label><strong>Rating:</strong></label>
-                <select value={reviewRating} onChange={(e) => setReviewRating(Number(e.target.value))} style={styles.selectInput}>
-                  {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} / 5</option>)}
-                </select>
-              </div>
-              <textarea value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Write your review..." required rows={4} style={styles.textarea} />
-              <button type="submit" disabled={submitting} style={styles.submitBtn}>{submitting ? 'Posting...' : 'Post Review'}</button>
-            </form>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <h3 style={{ margin: 0 }}>User Reviews</h3>
+            {currentUser && (
+              <button 
+                onClick={() => setIsCreateModalOpen(true)}
+                style={styles.submitBtn}
+              >
+                Write a Review
+              </button>
+            )}
+          </div>
+
           {loadingReviews && <div>Loading reviews...</div>}
-          {reviews.map((rev) => (
-            <div key={rev.id} style={styles.reviewCard}>
-              <UserCard user={rev.profiles} />
-              <div style={{ flex: 1 }}>
-                <div style={{ marginBottom: '6px' }}><span style={{ color: '#d4a017' }}>★ {rev.rating}/5</span></div>
-                <div style={styles.reviewContent}>{rev.content}</div>
-              </div>
-            </div>
-          ))}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {reviews.length > 0 ? (
+              reviews.map((rev) => (
+                <div key={rev.id} style={styles.reviewCardWrapper}>
+                    {/* Clickable user profile info */}
+                    <div style={styles.userInfoRow} onClick={() => navigate(`/profile/${rev.user_id}`)}>
+                        <img src={rev.profiles?.avatar_url || 'https://via.placeholder.com/30'} style={styles.miniPfp} alt="pfp" />
+                        <span style={styles.userName}>{rev.profiles?.username || 'Unknown User'}</span>
+                        <span style={styles.timestamp}>{new Date(rev.created_at).toLocaleDateString()}</span>
+                    </div>
+                    
+                    {/* Review content - Click to open Detail Modal */}
+                    <div onClick={() => setSelectedReview(rev)} style={{ cursor: 'pointer' }}>
+                        <div style={{ color: '#d4a017', marginBottom: '5px' }}>★ {rev.rating}/5</div>
+                        <div style={styles.reviewContent}>
+                            {rev.review_comment.length > 250 ? rev.review_comment.substring(0, 250) + "..." : rev.review_comment}
+                        </div>
+                    </div>
+                </div>
+              ))
+            ) : (
+              <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No reviews yet. Be the first to write one!</p>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* --- MODAL OVERLAYS --- */}
+      {isCreateModalOpen && (
+        <ReviewModal 
+          book={bookData} 
+          userId={currentUser?.id}
+          onClose={() => setIsCreateModalOpen(false)}
+          onReviewCreated={() => fetchReviews()} 
+        />
+      )}
+
+      {selectedReview && (
+        <ReviewDetailModal 
+          review={{...selectedReview, Books: bookData}} // Inject book info for the modal display
+          currentUserId={currentUser?.id}
+          onClose={() => setSelectedReview(null)}
+          onDeleteSuccess={() => fetchReviews()} 
+        />
+      )}
     </div>
   );
 }
@@ -272,12 +287,38 @@ const styles = {
       alignItems: 'center', fontSize: '12px', fontWeight: 'bold'
   },
   reviewsContainer: { marginTop: '20px', maxWidth: '900px', border: '1px solid #eee', borderRadius: '10px', padding: '16px', background: '#fafafa' },
-  reviewForm: { marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' },
-  selectInput: { padding: '6px', borderRadius: '4px', border: '1px solid #ccc' },
-  textarea: { padding: '10px', borderRadius: '6px', border: '1px solid #ccc', resize: 'vertical' },
-  submitBtn: { alignSelf: 'flex-start', padding: '8px 16px', borderRadius: '6px', border: 'none', background: '#333', color: '#fff', cursor: 'pointer' },
-  reviewCard: { display: 'flex', gap: '12px', padding: '12px', borderRadius: '8px', background: '#fff', border: '1px solid #eee', marginBottom: '10px' },
-  reviewContent: { color: '#333', lineHeight: 1.5, whiteSpace: 'pre-wrap' }
+  submitBtn: { padding: '8px 16px', borderRadius: '6px', border: 'none', background: '#333', color: '#fff', cursor: 'pointer', fontWeight: 'bold' },
+  reviewCardWrapper: {
+    padding: '15px',
+    background: '#fff',
+    border: '1px solid #eee',
+    borderRadius: '8px',
+    marginBottom: '10px'
+  },
+  userInfoRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginBottom: '10px',
+    cursor: 'pointer'
+  },
+  miniPfp: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    objectFit: 'cover'
+  },
+  userName: {
+    fontWeight: 'bold',
+    fontSize: '14px',
+    color: '#333'
+  },
+  timestamp: {
+    fontSize: '12px',
+    color: '#999',
+    marginLeft: 'auto'
+  },
+  reviewContent: { color: '#333', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontSize: '14px' }
 };
 
 export default BookDetailPage;

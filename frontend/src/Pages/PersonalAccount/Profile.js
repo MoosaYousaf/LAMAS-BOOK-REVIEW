@@ -5,19 +5,27 @@ import SidebarNav from '../../Components/SidebarNav';
 import SearchBar from '../../Components/SearchBar';
 import UserPeronalDataCard from '../../Components/Cards/UserPersonalDataCard';
 import TabSystem from '../../Components/TabSystem';
-import ReviewList from '../../Components/ReviewList';
+import ReviewList from '../../Components/Reviews/ReviewList';
 import ShelvesManager from '../../Components/Shelves/ShelvesManager';
-import CreateReviewPanel from '../../Components/CreateReviewPanel';
+import ReviewModal from '../../Components/Reviews/ReviewModal';
+import ReviewDetailModal from '../../Components/Reviews/ReviewDetailModal';
 
 function Profile() {
     const { userId } = useParams();
     const navigate = useNavigate();
+    
+    // Auth and Profile State
     const [profile, setProfile] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [followStatus, setFollowStatus] = useState(null);
     const [loading, setLoading] = useState(true);
+    
+    // Modal and Refresh State
     const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [selectedReview, setSelectedReview] = useState(null);
 
+    // Relationship Modal State
     const [relationshipModal, setRelationshipModal] = useState({ open: false, mode: 'followers' });
     const [relationshipRows, setRelationshipRows] = useState([]);
 
@@ -63,7 +71,6 @@ function Profile() {
 
         const isCurrentlyFollowing = followStatus !== null;
         const previousStatus = followStatus;
-
         const isTargetPrivate = profile.is_private === true;
         const newStatus = isCurrentlyFollowing ? null : (isTargetPrivate ? 'pending' : 'accepted');
 
@@ -87,9 +94,7 @@ function Profile() {
                     }]);
                 if (error) throw error;
             }
-
             await fetchProfileData();
-
         } catch (error) {
             console.error("Follow action failed:", error.message);
             setFollowStatus(previousStatus);
@@ -136,19 +141,27 @@ function Profile() {
         </div>
     );
 
+    // --- UPDATED TAB SYSTEM LOGIC ---
     const profileTabs = [
         {
             label: 'Reviews',
             content: (
-                <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     {isOwnProfile && (
-                        <CreateReviewPanel
-                            userId={profile?.id}
-                            onReviewCreated={() => setReviewRefreshKey((prev) => prev + 1)}
-                        />
+                        <button 
+                            onClick={() => setIsCreateModalOpen(true)}
+                            style={styles.createReviewBtn}
+                        >
+                            + Write a New Review
+                        </button>
                     )}
-                    <ReviewList userId={profile?.id} refreshKey={reviewRefreshKey} />
-                </>
+                    
+                    <ReviewList 
+                        userId={profile?.id} 
+                        refreshKey={reviewRefreshKey} 
+                        onReviewClick={(rev) => setSelectedReview(rev)}
+                    />
+                </div>
             )
         },
         {
@@ -186,13 +199,7 @@ function Profile() {
                         {canViewContent ? (
                             <TabSystem tabs={profileTabs} />
                         ) : (
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '80px 20px',
-                                border: '1px solid #eee',
-                                borderRadius: '12px',
-                                backgroundColor: '#fafafa'
-                            }}>
+                            <div style={styles.privateOverlay}>
                                 <h3 style={{ color: '#333' }}>This Account is Private</h3>
                                 <p style={{ color: '#666' }}>Follow this user to see their reviews and shelves.</p>
                             </div>
@@ -200,6 +207,24 @@ function Profile() {
                     </div>
                 </main>
             </div>
+
+            {/* --- MODAL OVERLAYS --- */}
+            {isCreateModalOpen && (
+                <ReviewModal 
+                    userId={currentUser?.id}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onReviewCreated={() => setReviewRefreshKey(prev => prev + 1)}
+                />
+            )}
+
+            {selectedReview && (
+                <ReviewDetailModal 
+                    review={selectedReview}
+                    currentUserId={currentUser?.id}
+                    onClose={() => setSelectedReview(null)}
+                    onDeleteSuccess={() => setReviewRefreshKey(prev => prev + 1)}
+                />
+            )}
 
             {relationshipModal.open && (
                 <div style={styles.overlay} onClick={() => setRelationshipModal({ open: false, mode: 'followers' })}>
@@ -241,6 +266,26 @@ function Profile() {
 }
 
 const styles = {
+    createReviewBtn: {
+        width: '100%',
+        padding: '16px',
+        borderRadius: '12px',
+        border: '2px dashed #ddd',
+        background: '#fff',
+        color: '#555',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        textAlign: 'center'
+    },
+    privateOverlay: {
+        textAlign: 'center',
+        padding: '80px 20px',
+        border: '1px solid #eee',
+        borderRadius: '12px',
+        backgroundColor: '#fafafa'
+    },
     overlay: {
         position: 'fixed',
         inset: 0,

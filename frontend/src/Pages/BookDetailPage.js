@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SidebarNav from '../Components/SidebarNav';
 import { supabase } from '../Services/supabaseClient';
 import ReviewModal from '../Components/Reviews/ReviewModal';
 import ReviewDetailModal from '../Components/Reviews/ReviewDetailModal';
+import UserReviewCard from '../Components/Cards/UserReviewCard';
 
 function BookDetailPage() {
   const navigate = useNavigate();
@@ -33,6 +34,9 @@ function BookDetailPage() {
   const [isHoveringX, setIsHoveringX] = useState(null); 
   const [currentUser, setCurrentUser] = useState(null);
 
+  // Track which private accounts the user is allowed to see
+  const [acceptedFollowing, setAcceptedFollowing] = useState([]);
+
   // --- EFFECTS ---
   useEffect(() => {
     const fetchBookInfo = async () => {
@@ -53,14 +57,8 @@ function BookDetailPage() {
     fetchBookInfo();
   }, [isbn, bookData]);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setCurrentUser(user);
-      if (user) fetchMyShelves(user.id);
-    });
-  }, [bookIsbn]);
-
-  const fetchMyShelves = async (userId) => {
+  // Fetch Shelves Helper
+  const fetchMyShelves = useCallback(async (userId) => {
     const { data, error } = await supabase
       .from('UserLists')
       .select(`*, ListEntries(isbn)`)
@@ -72,7 +70,26 @@ function BookDetailPage() {
       while (slots.length < 3) slots.push({ isPlaceholder: true });
       setMyShelves(slots);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const initUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUser(user);
+        
+        if (user) {
+            fetchMyShelves(user.id);
+            const { data: following } = await supabase
+                .from('Followers')
+                .select('following_id')
+                .eq('follower_id', user.id)
+                .eq('status', 'accepted');
+            
+            setAcceptedFollowing(following?.map(f => f.following_id) || []);
+        }
+    };
+    initUser();
+  }, [bookIsbn, fetchMyShelves]);
 
   const toggleBookOnShelf = async (list) => {
     if (list.isPlaceholder) return;
@@ -94,32 +111,50 @@ function BookDetailPage() {
 
   const isInAnyShelf = myShelves.some(list => !list.isPlaceholder && list.ListEntries?.some(e => e.isbn === bookIsbn));
 
-  // --- FETCH REVIEWS LOGIC ---
-  const fetchReviews = async () => {
+  // --- FETCH REVIEWS LOGIC WRAPPED IN CALLBACK ---
+  const fetchReviews = useCallback(async () => {
     if (!bookIsbn) return;
     setLoadingReviews(true);
     
-    // Fetch reviews with joined profile data
     const { data, error } = await supabase
       .from('Reviews')
       .select(`
         id, 
         rating, 
-        content, 
+        review_comment, 
         created_at, 
         user_id,
-        profiles:user_id (id, username, avatar_url)
+        book_id,
+        profiles: Reviews_user_id_fkey (
+            id, 
+            username, 
+            avatar_url, 
+            is_private
+        )
       `)
-      .eq('book_id', bookIsbn)
+      .eq('book_id', bookIsbn) 
       .order('created_at', { ascending: false });
 
-    if (!error) {
-      setReviews(data || []);
+    if (error) {
+        console.error("Supabase error fetching reviews:", error.message);
+    }
+
+    if (data) {
+      const filtered = data.filter(rev => {
+        if (currentUser?.id === rev.user_id) return true;
+        if (!rev.profiles) return false;
+        if (!rev.profiles.is_private) return true;
+        return acceptedFollowing.includes(rev.user_id);
+      });
+
+      setReviews(filtered);
     }
     setLoadingReviews(false);
-  };
+  }, [bookIsbn, currentUser, acceptedFollowing]); // Dependencies for the callback
 
-  useEffect(() => { fetchReviews(); }, [bookIsbn]);
+  useEffect(() => { 
+    fetchReviews(); 
+  }, [fetchReviews]); // fetchReviews is now a safe dependency
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -195,7 +230,6 @@ function BookDetailPage() {
           </div>
         </div>
 
-        {/* --- REFACTORED REVIEW SECTION --- */}
         <div style={styles.reviewsContainer}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3 style={{ margin: 0 }}>User Reviews</h3>
@@ -214,31 +248,27 @@ function BookDetailPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {reviews.length > 0 ? (
               reviews.map((rev) => (
-                <div key={rev.id} style={styles.reviewCardWrapper}>
-                    {/* Clickable user profile info */}
-                    <div style={styles.userInfoRow} onClick={() => navigate(`/profile/${rev.user_id}`)}>
-                        <img src={rev.profiles?.avatar_url || 'https://via.placeholder.com/30'} style={styles.miniPfp} alt="pfp" />
-                        <span style={styles.userName}>{rev.profiles?.username || 'Unknown User'}</span>
-                        <span style={styles.timestamp}>{new Date(rev.created_at).toLocaleDateString()}</span>
-                    </div>
-                    
-                    {/* Review content - Click to open Detail Modal */}
-                    <div onClick={() => setSelectedReview(rev)} style={{ cursor: 'pointer' }}>
-                        <div style={{ color: '#d4a017', marginBottom: '5px' }}>★ {rev.rating}/5</div>
-                        <div style={styles.reviewContent}>
-                            {rev.review_comment.length > 250 ? rev.review_comment.substring(0, 250) + "..." : rev.review_comment}
-                        </div>
-                    </div>
-                </div>
+                <UserReviewCard 
+                    key={rev.id} 
+                    isBookDetailPage={true}
+                    review={{
+                      ...rev, 
+                      Books: {
+                        book_title: rev.profiles?.username || "Unknown User",
+                        book_author: "Reader", 
+                        image_url_m: rev.profiles?.avatar_url || `https://api.dicebear.com/9.x/initials/svg?seed=${rev.profiles?.username || 'fallback'}`
+                      }
+                    }} 
+                    onClick={() => setSelectedReview(rev)} 
+                />
               ))
             ) : (
-              <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No reviews yet. Be the first to write one!</p>
+              <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No reviews yet.</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* --- MODAL OVERLAYS --- */}
       {isCreateModalOpen && (
         <ReviewModal 
           book={bookData} 
@@ -250,7 +280,15 @@ function BookDetailPage() {
 
       {selectedReview && (
         <ReviewDetailModal 
-          review={{...selectedReview, Books: bookData}} // Inject book info for the modal display
+          review={{
+            ...selectedReview, 
+            Books: {
+              ...bookData,
+              book_title: title,
+              book_author: author,
+              book_cover_url: cover
+            }
+          }} 
           currentUserId={currentUser?.id}
           onClose={() => setSelectedReview(null)}
           onDeleteSuccess={() => fetchReviews()} 
@@ -287,38 +325,7 @@ const styles = {
       alignItems: 'center', fontSize: '12px', fontWeight: 'bold'
   },
   reviewsContainer: { marginTop: '20px', maxWidth: '900px', border: '1px solid #eee', borderRadius: '10px', padding: '16px', background: '#fafafa' },
-  submitBtn: { padding: '8px 16px', borderRadius: '6px', border: 'none', background: '#333', color: '#fff', cursor: 'pointer', fontWeight: 'bold' },
-  reviewCardWrapper: {
-    padding: '15px',
-    background: '#fff',
-    border: '1px solid #eee',
-    borderRadius: '8px',
-    marginBottom: '10px'
-  },
-  userInfoRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '10px',
-    cursor: 'pointer'
-  },
-  miniPfp: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    objectFit: 'cover'
-  },
-  userName: {
-    fontWeight: 'bold',
-    fontSize: '14px',
-    color: '#333'
-  },
-  timestamp: {
-    fontSize: '12px',
-    color: '#999',
-    marginLeft: 'auto'
-  },
-  reviewContent: { color: '#333', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontSize: '14px' }
+  submitBtn: { padding: '8px 16px', borderRadius: '6px', border: 'none', background: '#333', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }
 };
 
 export default BookDetailPage;

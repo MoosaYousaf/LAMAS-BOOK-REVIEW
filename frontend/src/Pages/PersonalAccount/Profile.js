@@ -180,6 +180,47 @@ function Profile() {
         <div style={{ display: 'flex' }}>
             <SidebarNav />
 
+            <div style={{ 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                minWidth: 0, // CRITICAL: Allows flex child to shrink below its content size
+                backgroundColor: '#fff' 
+            }}>
+                <header style={{ padding: '20px', width: '100%', boxSizing: 'border-box' }}>
+                    <SearchBar onSearch={handleSearch} />
+                </header>
+
+                <main style={{ 
+                    padding: '20px', 
+                    maxWidth: '1000px', 
+                    margin: '0 auto', // Center it
+                    width: '100%', 
+                    boxSizing: 'border-box' // NEW: Prevents padding from causing scroll
+                }}>
+                    <UserPeronalDataCard
+                        profile={profile}
+                        isOwnProfile={isOwnProfile}
+                        followStatus={followStatus}
+                        onFollowAction={handleFollowToggle}
+                        onFollowersClick={() => openRelationshipList('followers')}
+                        onFollowingClick={() => openRelationshipList('following')}
+                    />
+
+                    <div style={{ marginTop: '30px', width: '100%' }}>
+                        {canViewContent ? (
+                            <TabSystem tabs={profileTabs} />
+                        ) : (
+                            <div style={styles.privateOverlay}>
+                                <h3 style={{ color: '#333' }}>This Account is Private</h3>
+                                <p style={{ color: '#666' }}>Follow this user to see their reviews and shelves.</p>
+                            </div>
+                        )}
+                    </div>
+                </main>
+            </div>
+
+            {/*
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <header style={{ padding: '20px' }}>
                     <SearchBar onSearch={handleSearch} />
@@ -207,6 +248,7 @@ function Profile() {
                     </div>
                 </main>
             </div>
+            */}
 
             {/* --- MODAL OVERLAYS --- */}
             {isCreateModalOpen && (
@@ -296,6 +338,17 @@ const styles = {
         zIndex: 100,
     },
     modal: {
+        width: '90%', // NEW: Responsive width
+        maxWidth: '420px',
+        maxHeight: '70vh',
+        overflowY: 'auto',
+        background: '#fff',
+        borderRadius: '10px',
+        padding: '16px',
+        boxShadow: '0 12px 24px rgba(0,0,0,0.18)',
+    },
+    /*
+    modal: {
         width: '100%',
         maxWidth: '420px',
         maxHeight: '70vh',
@@ -305,6 +358,7 @@ const styles = {
         padding: '16px',
         boxShadow: '0 12px 24px rgba(0,0,0,0.18)',
     },
+    */
     personRow: {
         width: '100%',
         border: '1px solid #eee',

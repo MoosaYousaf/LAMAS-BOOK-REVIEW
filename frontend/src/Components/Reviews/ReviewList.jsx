@@ -2,12 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../Services/supabaseClient';
 import UserReviewCard from '../Cards/UserReviewCard';
 
-/**
- * ReviewList Component
- * @param {string} userId - ID of the profile owner to fetch reviews for
- * @param {number} refreshKey - Incrementing this forces a re-fetch
- * @param {function} onReviewClick - Passed down to individual cards
- */
 const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
     const [reviews, setReviews] = useState([]);
     const [limit, setLimit] = useState(5);
@@ -19,16 +13,24 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
             if (!userId) return;
             setLoading(true);
 
+            // Fetch reviews, join with Books, and join with Profiles
             const { data, error } = await supabase
                 .from('Reviews')
-                .select('*, Books(*)') // Pull full book data for the cards
+                .select(`
+                    *,
+                    Books(*),
+                    profiles:user_id(*)
+                `) 
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false })
                 .range(0, limit - 1);
             
-            if (!error && data) {
+            if (error) {
+                console.error("Fetch error:", error);
+            }
+
+            if (data) {
                 setReviews(data);
-                // If we got fewer results than the limit, there are no more to load
                 if (data.length < limit) setHasMore(false);
             }
             setLoading(false);
@@ -52,10 +54,7 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
                     ))}
                     
                     {hasMore && (
-                        <button
-                            onClick={() => setLimit(prev => prev + 5)}
-                            style={styles.loadMoreBtn}
-                        >
+                        <button onClick={() => setLimit(prev => prev + 5)} style={styles.loadMoreBtn}>
                             Load More
                         </button>
                     )}
@@ -71,24 +70,8 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
 
 const styles = {
     statusText: { textAlign: 'center', color: '#666', padding: '20px' },
-    loadMoreBtn: { 
-        padding: '12px', 
-        cursor: 'pointer', 
-        background: '#fff', 
-        border: '1px solid #ddd', 
-        borderRadius: '8px',
-        fontWeight: 'bold',
-        color: '#555',
-        marginTop: '10px'
-    },
-    emptyState: {
-        textAlign: 'center',
-        padding: '40px',
-        background: '#f9f9f9',
-        borderRadius: '12px',
-        border: '1px dashed #ccc',
-        color: '#999'
-    }
+    loadMoreBtn: { padding: '12px', cursor: 'pointer', background: '#fff', border: '1px solid #ddd', borderRadius: '8px', fontWeight: 'bold', color: '#555', marginTop: '10px' },
+    emptyState: { textAlign: 'center', padding: '40px', background: '#f9f9f9', borderRadius: '12px', border: '1px dashed #ccc', color: '#999' }
 };
 
 export default ReviewList;

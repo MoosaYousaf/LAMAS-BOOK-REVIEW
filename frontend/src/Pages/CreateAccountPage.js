@@ -30,7 +30,7 @@ function CreateAccountPage() {
             // prevent "loop" if a google user lands here 
             const { data } = await supabase
                 .from('Profiles')
-                .select('is_onboarding_complete, full_name')
+                .select('is_onboarding_complete, full_name, avatar_url')
                 .eq('id', user.id)
                 .single();
             
@@ -41,6 +41,7 @@ function CreateAccountPage() {
                 setProfile(prev => ({
                     ...prev,
                     full_name: data?.full_name || user.user_metadata?.full_name || '',
+                    avatar_url: data.avatar_url || '',
                 }));
             }
 

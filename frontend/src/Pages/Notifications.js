@@ -16,41 +16,50 @@ const Notifications = () => {
         if (!user) return setLoading(false);
 
         try {
-            // Run both follow-related queries in parallel
+            // 1. Fetch received follows and sent follows in parallel
             const [received, sent] = await Promise.all([
                 supabase.from('Followers').select('status, follower_id').eq('following_id', user.id),
                 supabase.from('Followers').select('following_id').eq('follower_id', user.id)
             ]);
 
-            if (received.error) {
-                console.error('Error loading received follows:', received.error);
-                return setNotifications([]);
-            }
+            if (received.error) throw received.error;
 
-            if (sent.error) {
-                console.error('Error loading sent follows:', sent.error);
-            }
+            const followingIds = new Set(sent.data?.map(f => f.following_id) || []);
+            const uniqueFollowerIds = [...new Set(received.data.map(f => f.follower_id))];
 
-            if (!received.data.length) return setNotifications([]);
-
-            const followingIds = new Set(sent.data?.map(f => f.following_id));
-            const uniqueFollowers = [...new Set(received.data.map(f => f.follower_id))];
-
-            // Fetch profiles for the names
+            // 2. Fetch profiles for the followers
             const { data: profiles } = await supabase
                 .from('Profiles')
-                .select('id, username')
-                .in('id', uniqueFollowers);
+                .select('id, username, avatar_url')
+                .in('id', uniqueFollowerIds);
 
-            const profileMap = Object.fromEntries(profiles?.map(p => [p.id, p.username]) || []);
+            const profileMap = {};
+            profiles?.forEach(p => {
+                profileMap[p.id] = p;
+            });
 
-            // Assemble notifications
-            setNotifications(received.data.map((f, i) => ({
-                id: `${f.follower_id}-${i}`,
-                ...f,
-                username: profileMap[f.follower_id] || 'Unknown User',
-                isAlreadyFollowingBack: followingIds.has(f.follower_id)
-            })));
+            // 3. Assemble and FILTER
+            const assembledNotifications = received.data
+                .map((f, i) => {
+                    const userData = profileMap[f.follower_id];
+                    const followingBack = followingIds.has(f.follower_id);
+                    
+                    return {
+                        id: `${f.follower_id}-${i}`,
+                        ...f,
+                        username: userData?.username || 'Unknown User',
+                        avatar_url: userData?.avatar_url,
+                        isAlreadyFollowingBack: followingBack
+                    };
+                })
+                .filter(n => {
+                    // LOGIC: Hide notification if we are already mutual friends
+                    // Keep it if: 1. It's pending OR 2. It's accepted but we haven't followed back yet
+                    const isMutual = n.status === 'accepted' && n.isAlreadyFollowingBack;
+                    return !isMutual;
+                });
+
+            setNotifications(assembledNotifications);
 
         } catch (err) {
             console.error("Fetch failed:", err);
@@ -72,7 +81,6 @@ const Notifications = () => {
             <SidebarNav />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 
-                {/* Search Bar centered in its own row - */}
                 <header style={{ 
                     padding: '20px', 
                     display: 'flex', 
@@ -106,7 +114,6 @@ const Notifications = () => {
                                 />
                             ))
                         ) : (
-                            /* Explicit empty state box - */
                             <div style={{ padding: '60px', textAlign: 'center', color: '#888' }}>
                                 <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold' }}>
                                     No new notifications

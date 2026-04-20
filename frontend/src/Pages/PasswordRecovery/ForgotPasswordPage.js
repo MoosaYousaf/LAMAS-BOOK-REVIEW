@@ -1,58 +1,76 @@
 import React, { useState } from 'react';
 import { supabase } from '../../Services/supabaseClient';
+import { useNavigate } from 'react-router-dom';
+import '../../Styles/authentication.css';
 
 function ForgotPasswordPage() {
-    const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState('');
-    const [message, setMessage] = useState('');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
-    const handleResetRequest = async (e) => {
-        e.preventDefault();
-        setLoading(true);
+  const handleResetRequest = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: 'http://localhost:3000/resetPassword',
-        });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'http://localhost:3000/resetPassword',
+    });
 
-        if (error) {
-            alert(error.message);
-        } else {
-            setMessage("Check your email for the password reset link!");
-        }
-        setLoading(false);
+    if (error) {
+      alert(error.message);
+    } else {
+      setMessage('Check your email for the password reset link!');
     }
 
-    return(
-        <div style={styles.container}>
-            <h2>Reset Your Password</h2>
-            <p style={{fontSize: '14px', color: '#666', textAlign: 'center'}}>
-                Enter your email and we'll send you a link to get back into your account.
-            </p>
-            {message ? (
-                <p style={{ color: 'green', fontWeight: 'bold' }}></p>
-            ) : (
-                <form onSubmit={handleResetRequest} style={styles.form}>
-                    <input
-                        type="email"
-                        placeholder="Email Address"
-                        required
-                        style={styles.input}
-                        onChange={(e) => setEmail(e.target.value)} 
-                    />
-                    <button type="submit" style={styles.submitBtn} disabled={loading}>
-                        {loading ? 'Sending...' : 'Send Reset Link'}
-                    </button>
-                </form>
-            )}
-        </div>
-    );
-}
+    setLoading(false);
+  };
 
-const styles = {
-    container: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px', fontFamily: 'Arial, sans-serif', padding: '20px' },
-    form: { display: 'flex', flexDirection: 'column', gap: '15px', width: '350px' },
-    input: { padding: '12px', borderRadius: '5px', border: '1px solid #ccc' },
-    submitBtn: { padding: '12px', backgroundColor: '#333', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }
+  return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2 className="auth-title">Reset Your Password</h2>
+
+        <p className="auth-description">
+          Enter your email and we'll send you a link to get back into your account.
+        </p>
+
+        {message ? (
+          <p className="auth-message">{message}</p>
+        ) : (
+          <form onSubmit={handleResetRequest} className="auth-form">
+            <input
+              type="email"
+              placeholder="Email Address"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="auth-input"
+            />
+
+            <button
+              className="auth-primary-button auth-button auth-button-full"
+              type="submit"
+              disabled={loading}
+              style={{
+                cursor: loading ? 'default' : 'pointer',
+                opacity: loading ? 0.8 : 1,
+              }}
+            >
+              {loading ? 'Sending...' : 'Send Reset Link'}
+            </button>
+          </form>
+        )}
+
+        <p
+          className="auth-link"
+          onClick={() => navigate('/')}
+        >
+          Back to Login
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default ForgotPasswordPage;

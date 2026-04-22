@@ -1,5 +1,10 @@
-/* UserReviewCard.css */
+/* ============================================
+   UserReviewCard.css
+   Clickable review summary card — used on the
+   profile page, book detail page, and community feed.
+   ============================================ */
 
+/* Card container — lifts slightly on hover */
 .urc {
   display: flex;
   gap: 16px;
@@ -20,6 +25,7 @@
   transform: translateY(-2px);
 }
 
+/* Book cover image — tall rectangle used on profile and community feed */
 .urc__cover {
   width: 70px;
   height: 105px;
@@ -28,6 +34,8 @@
   flex-shrink: 0;
 }
 
+/* Reviewer profile picture — circle used on the Book Detail page where the
+   book is already known and the reviewer's identity is the relevant context */
 .urc__pfp {
   width: 52px;
   height: 52px;

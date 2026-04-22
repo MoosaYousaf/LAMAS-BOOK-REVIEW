@@ -1,3 +1,16 @@
+// FollowButton — a standalone follow/unfollow button used in search results and profile cards.
+// Handles three follow relationship states:
+//
+//   null     — not following; shows a "Follow" button
+//   pending  — follow request sent to a private account, waiting for approval; button disabled
+//   accepted — actively following; shows a checkmark that turns into "Unfollow" on hover
+//
+// When following a private account, the insert uses status = 'pending' instead of
+// 'accepted' so the target user can review the request in their Notifications page.
+//
+// Note: this component uses legacy inline styles. The fully styled equivalent
+// used on profile pages is UserPersonalDataCard's built-in follow button.
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../Services/supabaseClient';
 
@@ -24,11 +37,13 @@ const FollowButton = ({ targetUserId, isTargetPrivate, currentUser }) => {
         if (!currentUser) return;
 
         if (status) {
+            // Any existing follow row (pending or accepted) is removed on click
             await supabase.from('Followers').delete()
                 .eq('follower_id', currentUser.id)
                 .eq('following_id', targetUserId);
             setStatus(null);
         } else {
+            // Private accounts require approval — insert as 'pending'; public accounts are 'accepted' immediately
             const newStatus = isTargetPrivate ? 'pending' : 'accepted';
             await supabase.from('Followers').insert([{
                 follower_id: currentUser.id,

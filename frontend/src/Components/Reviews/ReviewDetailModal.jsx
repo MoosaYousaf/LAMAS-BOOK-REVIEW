@@ -1,3 +1,16 @@
+// ReviewDetailModal — full-screen overlay modal showing a single review in detail.
+// Displays the reviewer's profile, the book, rating, and full review text.
+// If the current user is the review author, Edit and Delete controls appear.
+//
+// The `review` prop can come from two different Supabase query shapes:
+//   - From a Reviews query with profile/book joins (profile page, book detail page)
+//   - From a denormalized shape (community page)
+// The userData/bookData variables below handle all three shapes with fallback chains.
+//
+// Clicking the user row navigates to their profile.
+// Clicking the book row navigates to the book detail page.
+// Edit mode swaps the text and rating into editable inputs in-place.
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../Services/supabaseClient';
@@ -14,6 +27,9 @@ const ReviewDetailModal = ({ review, currentUserId, onClose, onDeleteSuccess }) 
     const [editedRating, setEditedRating] = useState(review.rating);
     const [isSaving, setIsSaving] = useState(false);
 
+    // Normalise the review data regardless of which query shape it came from.
+    // `review.profiles` is the joined Profiles row; `review.user_data` is a
+    // legacy alias; falling back to `review` itself covers denormalised shapes.
     const userData = review.profiles || review.user_data || review;
     const bookData = review.Books || review.book_data || review;
 
@@ -45,6 +61,8 @@ const ReviewDetailModal = ({ review, currentUserId, onClose, onDeleteSuccess }) 
             }).eq('id', review.id);
             if (error) throw error;
             setIsEditing(false);
+            // onDeleteSuccess is reused here as a generic "something changed" callback
+            // that tells the parent to re-fetch reviews after an edit or delete
             if (onDeleteSuccess) onDeleteSuccess();
         } catch (err) {
             alert('Error: ' + err.message);

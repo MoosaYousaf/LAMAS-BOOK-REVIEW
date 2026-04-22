@@ -1,4 +1,10 @@
-/* ShelvesManager.css — covers ShelvesManager, CustomShelfCard, ListModal */
+/* ============================================
+   ShelvesManager.css
+   Shared stylesheet for all shelf-related and
+   social components on the Profile page.
+   Covers: ShelvesManager, CustomShelfCard,
+           ListModal, NotificationRow, UserCard
+   ============================================ */
 
 /* ---- ShelvesManager container ---- */
 .shelves-wrap {

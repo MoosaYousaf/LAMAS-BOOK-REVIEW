@@ -1,3 +1,15 @@
+// CustomShelfCard — displays a single user-created book shelf.
+// There are two visual states:
+//
+//   Placeholder (list.isPlaceholder = true):
+//     An empty dashed slot. If the viewer owns the profile, a '+' prompts them
+//     to create a new shelf. Visitors see an empty slot with no affordance.
+//
+//   Real shelf:
+//     Shows the shelf name, book count, optional description, and a row of up
+//     to 3 cover thumbnails as a preview. If there are more than 3 books, a
+//     "+N more" badge is appended.
+
 import '../../Styles/variables.css';
 import '../../Styles/Components/ShelvesManager.css';
 
@@ -10,6 +22,7 @@ const CustomShelfCard = ({ list, onClick, isOwnProfile }) => {
         );
     }
 
+    // Show at most 3 book covers as a visual preview of the shelf's contents
     const previewBooks = list.ListEntries?.slice(0, 3) || [];
 
     return (

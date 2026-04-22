@@ -1,3 +1,8 @@
+// BookCard — displays a single book with its cover image, title, author, and ISBN.
+// Used in the Dashboard explore grid and inside ListModal for shelf contents.
+// Prefers the medium cover (image_url_m) and falls back to large (image_url_l).
+// If the image fails to load, a "No Cover" placeholder is shown instead.
+
 import { useState } from 'react';
 import '../../Styles/variables.css';
 import '../../Styles/Components/BookCard.css';
@@ -5,6 +10,7 @@ import '../../Styles/Components/BookCard.css';
 const BookCard = ({ book }) => {
     const [imgFailed, setImgFailed] = useState(false);
 
+    // Prefer medium cover for faster load; fall back to large if medium is missing
     const primarySrc = book.image_url_m || book.image_url_l;
 
     return (

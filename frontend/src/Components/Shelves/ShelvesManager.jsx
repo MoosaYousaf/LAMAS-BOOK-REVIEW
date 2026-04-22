@@ -1,3 +1,16 @@
+// ShelvesManager — renders a user's complete shelf section on their profile page.
+// Displays up to 3 custom shelves (CustomShelfCard) and a grid of recently shelved books.
+//
+// The app enforces a maximum of 3 custom shelves per user. To always render a full
+// row of 3 cards even when the user has fewer shelves, placeholder slots are padded
+// in with `isPlaceholder: true`. Owners see a '+' on placeholders to create a new shelf;
+// visitors see an empty slot with no action.
+//
+// Props:
+//   targetUserId  — the profile owner's ID (may differ from the logged-in user)
+//   isOwnProfile  — controls whether create/edit shelf actions are visible
+//   canViewContent — false for private profiles the viewer doesn't follow; hides all content
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../../Services/supabaseClient';
 import CustomShelfCard from './CustomShelfCard';
@@ -33,6 +46,7 @@ function ShelvesManager({ targetUserId, isOwnProfile, canViewContent }) {
         setIsModalOpen(true);
     };
 
+    // Pad with placeholder objects so there are always exactly 3 shelf slots shown
     const customSlots = [...customLists];
     while (customSlots.length < 3) customSlots.push({ isPlaceholder: true });
 

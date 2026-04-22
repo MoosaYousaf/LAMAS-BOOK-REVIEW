@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../Services/supabaseClient';
+// [PERF FIX #1] Import useUser hook to read user data from global context
+// instead of making redundant auth + Profiles fetches on every mount.
+import { useUser } from '../Context/UserContext';
 import {
   MdDashboard,
   MdPeople,
@@ -15,28 +18,19 @@ import '../Styles/Components/SidebarNav.css';
 function SidebarNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [myId, setMyId] = useState(null);
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const [username, setUsername] = useState('');
 
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setMyId(user.id);
-        const { data: profile } = await supabase
-          .from('Profiles')
-          .select('avatar_url, username')
-          .eq('id', user.id)
-          .single();
-        if (profile) {
-          setAvatarUrl(profile.avatar_url);
-          setUsername(profile.username);
-        }
-      }
-    };
-    getSession();
-  }, []);
+  // [PERF FIX #1] Removed redundant auth fetch — user data now comes from
+  // UserContext which fetches once at app level. See src/Context/UserContext.js.
+  // Previously this component had its own useEffect that called:
+  // - supabase.auth.getUser()
+  // - supabase.from('Profiles').select(...)
+  // Both calls are now eliminated, reducing network requests by 2 per page navigation.
+  const { userProfile } = useUser();
+
+  // [PERF FIX #1] Derive values from context instead of local state.
+  const myId = userProfile?.id || null;
+  const avatarUrl = userProfile?.avatar_url || null;
+  const username = userProfile?.username || '';
 
   const navItems = [
     { label: 'Dashboard',     path: '/dashboard',    icon: <MdDashboard /> },

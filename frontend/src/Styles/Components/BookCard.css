@@ -13,11 +13,14 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform var(--transition-med), border-color var(--transition-med);
   width: 100%;
-  will-change: transform;
+  /* [PERF FIX #4] Removed permanent will-change from base style.
+     Moved to :hover so the GPU layer is only promoted when actually needed,
+     instead of holding 24 compositor layers simultaneously at all times. */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 .book-card:hover {
+  will-change: transform;
   transform: translateY(-4px);
   border-color: rgba(238, 138, 52, 0.35);
 }

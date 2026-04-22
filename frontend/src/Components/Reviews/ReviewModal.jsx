@@ -1,3 +1,15 @@
+// ReviewModal — dark glass overlay modal for writing a new review.
+// There are two entry points into this modal:
+//
+//   1. From the Book Detail Page — `book` prop is already set, so the book
+//      selection step is skipped and the user goes straight to writing their review.
+//
+//   2. From a generic "Create Review" button — `book` is null, so the user
+//      first searches for a book by title, selects it, then fills in the review.
+//
+// On submit, inserts a row into the Reviews table and calls onReviewCreated()
+// so the parent can refresh its review list without a full page reload.
+
 import { useState } from 'react';
 import { supabase } from '../../Services/supabaseClient';
 import '../../Styles/variables.css';
@@ -22,6 +34,8 @@ const ReviewModal = ({ book, userId, onClose, onReviewCreated }) => {
             .limit(20);
 
         if (!error) {
+            // Sort results so exact matches appear first, then prefix matches,
+            // then alphabetical — mirrors the SearchBar's ranking logic
             const q = searchQuery.toLowerCase().trim();
             const sorted = (data || []).sort((a, b) => {
                 const aT = a.book_title.toLowerCase(), bT = b.book_title.toLowerCase();

@@ -14,12 +14,53 @@ const SearchBar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const searchRef = useRef(null);
 
+    // [PERF FIX #8] Request ID guard — prevents stale search results from
+    // overwriting fresher ones when queries resolve out of order.
+    const latestRequestId = useRef(0);
+
+    /**
+     * Search effect with debounce and race condition guard.
+     *
+     * The 300ms debounce reduces network requests during rapid typing.
+     * The request ID pattern ensures that if multiple queries are in flight
+     * and resolve out of order, only the most recent query's results are
+     * displayed. Without this, a slow query A could overwrite a fast query B's
+     * correct results, causing the dropdown to show stale/wrong suggestions.
+     *
+     * How it works:
+     * 1. Each search invocation increments latestRequestId.ref
+     * 2. The current request captures its ID before the async operation
+     * 3. When the async operation completes, it compares its captured ID
+     *    against the current latestRequestId.ref
+     * 4. If they don't match, a newer query has been initiated and this
+     *    result is silently discarded
+     */
     useEffect(() => {
         const delay = setTimeout(async () => {
             if (query.trim().length > 1) {
+                // [PERF FIX #8] Increment and capture the request ID for this search.
+                // This ID will be compared after the async operation completes.
+                latestRequestId.current += 1;
+                const thisRequestId = latestRequestId.current;
+
                 let data = await searchDatabase(query, type);
+
+                // [PERF FIX #8] Stale response guard — if a newer query has been
+                // initiated while this one was in flight, discard these results.
+                // This is intentional, not a bug: it prevents race conditions where
+                // slow old queries overwrite fast new queries.
+                if (thisRequestId !== latestRequestId.current) {
+                    return;
+                }
+
                 if (type === 'users') {
                     const { data: { user } } = await supabase.auth.getUser();
+
+                    // [PERF FIX #8] Check again after the second async operation
+                    if (thisRequestId !== latestRequestId.current) {
+                        return;
+                    }
+
                     if (user) data = data.filter(u => u.id !== user.id);
                     data.sort((a, b) => a.username.localeCompare(b.username));
                 } else {
@@ -72,15 +113,17 @@ const SearchBar = () => {
     return (
         <div ref={searchRef} className="searchbar">
             <form onSubmit={triggerFullSearch} className="searchbar__form">
-                <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="searchbar__select"
+                <button
+                    type="button"
+                    onClick={() => {
+                        const types = ['title', 'author', 'users'];
+                        setType(types[(types.indexOf(type) + 1) % types.length]);
+                    }}
+                    className="searchbar__type-btn"
+                    title="Click to switch search type"
                 >
-                    <option value="title">Title</option>
-                    <option value="author">Author</option>
-                    <option value="users">Users</option>
-                </select>
+                    {type === 'title' ? 'Title' : type === 'author' ? 'Author' : 'Users'}
+                </button>
 
                 <input
                     type="text"

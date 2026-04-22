@@ -1,3 +1,11 @@
+// TabSystem — a generic tab container used on the Profile page to switch between
+// sections (e.g. "Reviews", "Shelves", "Activity").
+//
+// Props:
+//   tabs — array of { label: string, content: ReactNode }
+//          Each object provides the tab button text and the content to render
+//          when that tab is active.
+
 import { useState } from 'react';
 import '../Styles/variables.css';
 import '../Styles/Components/TabSystem.css';

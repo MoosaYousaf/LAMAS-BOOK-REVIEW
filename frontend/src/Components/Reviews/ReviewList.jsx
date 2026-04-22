@@ -1,3 +1,13 @@
+// ReviewList — paginated list of a user's reviews shown on their profile page.
+// Uses a limit-offset approach: starts at 5 reviews and loads 5 more each time
+// "Load More" is clicked. If fewer results than `limit` come back, there are no
+// more pages and the button hides itself.
+//
+// Props:
+//   userId       — the profile owner's Supabase user ID
+//   refreshKey   — bump this number from the parent to force a re-fetch (e.g. after posting a new review)
+//   onReviewClick — called with the selected review object to open ReviewDetailModal
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../Services/supabaseClient';
 import UserReviewCard from '../Cards/UserReviewCard';
@@ -8,6 +18,7 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(true);
 
+    // Re-runs whenever the user changes, the limit grows, or the parent bumps refreshKey
     useEffect(() => {
         const fetchReviews = async () => {
             if (!userId) return;
@@ -29,6 +40,7 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
 
             if (data) {
                 setReviews(data);
+                // If fewer results than the requested limit came back, we've reached the end
                 if (data.length < limit) setHasMore(false);
             }
             setLoading(false);

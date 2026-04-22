@@ -1,3 +1,14 @@
+// CreateReviewPanel — a standalone form for writing a review by manually entering
+// a book's ISBN, title, author, and cover URL. Used as a fallback when a book
+// doesn't already exist in the database.
+//
+// On submit it first checks whether the book already exists in the Books table.
+// If not, it inserts the book row before inserting the review — this is an upsert
+// pattern that keeps the Books table consistent without requiring a separate admin step.
+//
+// Note: this panel uses legacy inline styles. If the design is ever updated,
+// replace the `styles` object at the bottom with CSS classes from a stylesheet.
+
 import React, { useState } from 'react';
 import { supabase } from '../../Services/supabaseClient';
 
@@ -36,12 +47,14 @@ function CreateReviewPanel({ userId, onReviewCreated }) {
     try {
       const normalizedIsbn = form.isbn.trim();
 
+      // Check if the book already exists before inserting to avoid duplicate rows
       const { data: existingBook } = await supabase
         .from('Books')
         .select('isbn')
         .eq('isbn', normalizedIsbn)
         .maybeSingle();
 
+      // Only create the book row if it's not already in the database
       if (!existingBook) {
         const { error: bookInsertError } = await supabase.from('Books').insert({
           isbn: normalizedIsbn,

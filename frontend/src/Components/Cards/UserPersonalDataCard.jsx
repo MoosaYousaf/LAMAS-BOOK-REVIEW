@@ -1,8 +1,20 @@
+// UserPersonalDataCard — the profile header card showing avatar, username, bio,
+// and follower/following counts. Shown at the top of any user's profile page.
+//
+// Props:
+//   profile        — the user's Profiles row from Supabase
+//   isOwnProfile   — hides the follow button when viewing your own page
+//   followStatus   — 'accepted' | 'pending' | null, controls the follow button label
+//   onFollowAction — called when the follow/unfollow button is clicked
+//   onFollowersClick / onFollowingClick — open the followers/following modal
+
 import '../../Styles/variables.css';
 import '../../Styles/Pages/ProfilePage.css';
 
 const UserPersonalDataCard = ({ profile, isOwnProfile, followStatus, onFollowAction, onFollowersClick, onFollowingClick }) => {
 
+    // Derives the button label and style class from the current follow relationship.
+    // 'pending' means a follow request was sent but not yet accepted (private account).
     const getFollowBtn = () => {
         if (followStatus === 'accepted') return { text: 'Unfollow', cls: 'updc__follow-btn--following' };
         if (followStatus === 'pending') return { text: 'Requested', cls: 'updc__follow-btn--pending' };

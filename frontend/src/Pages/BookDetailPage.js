@@ -1,4 +1,16 @@
-import { useEffect, useState, useCallback } from 'react';
+// BookDetailPage — shows everything about a single book: cover, metadata, and user reviews.
+// Reached by clicking a BookCard anywhere in the app; the `book` object is passed via
+// router state so the page renders immediately without an extra network request.
+// If no state is provided (e.g. direct URL navigation), it fetches the book by ISBN.
+//
+// Key behaviours:
+//   - "Add to Shelf" button: small cream popup anchored to the button's top-right corner
+//     (not a full-screen modal). Clicking outside the popup closes it via a mousedown listener.
+//   - Reviews: filtered by privacy — private accounts' reviews are only shown if the
+//     current user follows them (checked against the `acceptedFollowing` list).
+//   - "Write a Review" opens ReviewModal, which re-fetches reviews on success.
+
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SidebarNav from '../Components/SidebarNav';
 import { supabase } from '../Services/supabaseClient';
@@ -32,6 +44,7 @@ function BookDetailPage() {
     const [currentUser, setCurrentUser] = useState(null);
     const [acceptedFollowing, setAcceptedFollowing] = useState([]);
     const [imgFailed, setImgFailed] = useState(false);
+    const shelfPopupRef = useRef(null);
 
     useEffect(() => {
         if (!bookData && isbn) {
@@ -106,6 +119,17 @@ function BookDetailPage() {
 
     useEffect(() => { fetchReviews(); }, [fetchReviews]);
 
+    useEffect(() => {
+        if (!showShelfSelector) return;
+        const handler = (e) => {
+            if (shelfPopupRef.current && !shelfPopupRef.current.contains(e.target)) {
+                setShowShelfSelector(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [showShelfSelector]);
+
     return (
         <div className="pg-wrap">
             <div className="pg-bg" />
@@ -130,12 +154,47 @@ function BookDetailPage() {
                             )}
 
                             {currentUser && (
-                                <button
-                                    onClick={() => setShowShelfSelector(true)}
-                                    className={`bdp-shelf-btn ${isInAnyShelf ? 'bdp-shelf-btn--in' : 'bdp-shelf-btn--out'}`}
-                                >
-                                    {isInAnyShelf ? '✓' : '+'}
-                                </button>
+                                <div className="bdp-shelf-btn-wrap" ref={shelfPopupRef}>
+                                    <button
+                                        onClick={() => setShowShelfSelector(v => !v)}
+                                        className={`bdp-shelf-btn ${isInAnyShelf ? 'bdp-shelf-btn--in' : 'bdp-shelf-btn--out'}`}
+                                    >
+                                        {isInAnyShelf ? '✓' : '+'}
+                                    </button>
+                                    {showShelfSelector && (
+                                        <div className="bdp-shelf-popup">
+                                            <p className="bdp-shelf-modal-title">Add to Shelf</p>
+                                            <div className="bdp-shelf-modal-list">
+                                                {myShelves.map((list, idx) => {
+                                                    const inThis = !list.isPlaceholder && list.ListEntries?.some(e => e.isbn === bookIsbn);
+                                                    return list.isPlaceholder ? (
+                                                        <div key={`slot-${idx}`} className="bdp-shelf-modal-item bdp-shelf-modal-item--disabled">
+                                                            Empty Shelf Slot {idx + 1}
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            key={list.id}
+                                                            onClick={() => toggleBookOnShelf(list)}
+                                                            className={`bdp-shelf-modal-item${inThis ? ' bdp-shelf-modal-item--in' : ''}`}
+                                                        >
+                                                            <span>{list.name}</span>
+                                                            {inThis && (
+                                                                <div
+                                                                    onMouseEnter={() => setIsHoveringX(list.id)}
+                                                                    onMouseLeave={() => setIsHoveringX(null)}
+                                                                    className="bdp-mini-check"
+                                                                    style={{ backgroundColor: isHoveringX === list.id ? '#c0392b' : 'var(--color-glow)' }}
+                                                                >
+                                                                    {isHoveringX === list.id ? '✕' : '✓'}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
 
@@ -185,43 +244,6 @@ function BookDetailPage() {
                     </div>
                 </div>
             </div>
-
-            {showShelfSelector && (
-                <div className="modal-overlay" onClick={() => setShowShelfSelector(false)}>
-                    <div className="modal-lite bdp-shelf-modal" onClick={(e) => e.stopPropagation()}>
-                        <button className="modal-close-lite" onClick={() => setShowShelfSelector(false)}>✕</button>
-                        <h4 className="bdp-shelf-modal-title">Add to Shelf</h4>
-                        <div className="bdp-shelf-modal-list">
-                            {myShelves.map((list, idx) => {
-                                const inThis = !list.isPlaceholder && list.ListEntries?.some(e => e.isbn === bookIsbn);
-                                return list.isPlaceholder ? (
-                                    <div key={`slot-${idx}`} className="bdp-shelf-modal-item bdp-shelf-modal-item--disabled">
-                                        Empty Shelf Slot {idx + 1}
-                                    </div>
-                                ) : (
-                                    <div
-                                        key={list.id}
-                                        onClick={() => toggleBookOnShelf(list)}
-                                        className={`bdp-shelf-modal-item${inThis ? ' bdp-shelf-modal-item--in' : ''}`}
-                                    >
-                                        <span>{list.name}</span>
-                                        {inThis && (
-                                            <div
-                                                onMouseEnter={() => setIsHoveringX(list.id)}
-                                                onMouseLeave={() => setIsHoveringX(null)}
-                                                className="bdp-mini-check"
-                                                style={{ backgroundColor: isHoveringX === list.id ? '#c0392b' : 'var(--color-glow)' }}
-                                            >
-                                                {isHoveringX === list.id ? '✕' : '✓'}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {isCreateModalOpen && (
                 <ReviewModal

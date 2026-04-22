@@ -1,5 +1,10 @@
-/* TabSystem.css */
+/* ============================================
+   TabSystem.css
+   Generic glass tab container used on the Profile page
+   to switch between sections (Reviews, Shelves, etc.).
+   ============================================ */
 
+/* Full-width glass panel that wraps the tab headers and content */
 .tab-container {
   width: 100%;
   box-sizing: border-box;

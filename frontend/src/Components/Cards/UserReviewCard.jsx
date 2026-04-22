@@ -1,15 +1,32 @@
+// UserReviewCard — a clickable card showing a single review summary.
+// Used in three different contexts, controlled by props:
+//
+//   Default (profile page):
+//     Shows the book cover (tall rectangle), book title, author, stars, and excerpt.
+//
+//   isBookDetailPage = true (book detail page):
+//     The left image switches from the book cover to a circular profile picture
+//     because the book is already known — it shows the reviewer's avatar instead.
+//     The "Books" object is repurposed to carry the user's name/avatar in this context.
+//
+//   friendMode = true (community page):
+//     Adds a friend badge in the top-right corner with the friend's name and avatar,
+//     and shows the review date — used for the "friends' recent reviews" feed.
+
 import '../../Styles/variables.css';
 import '../../Styles/Components/UserReviewCard.css';
 
 const UserReviewCard = ({ review, onClick, friendMode, friendData, isBookDetailPage }) => {
     const { Books, review_comment, rating, created_at } = review;
 
+    // Truncate long reviews to keep the card height consistent
     const truncated = review_comment?.length > 180
         ? review_comment.substring(0, 180) + '...'
         : review_comment;
 
     return (
         <div className="urc" onClick={() => onClick(review)}>
+            {/* urc__pfp is a circle (reviewer avatar); urc__cover is a tall rectangle (book cover) */}
             <img
                 src={Books?.image_url_m || Books?.image_url_l || `https://api.dicebear.com/9.x/initials/svg?seed=book`}
                 alt="cover"

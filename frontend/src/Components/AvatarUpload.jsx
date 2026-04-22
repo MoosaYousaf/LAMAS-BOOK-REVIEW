@@ -1,3 +1,11 @@
+// AvatarUpload — a profile photo picker used on the account creation and settings pages.
+// Uploads the selected image to the Supabase 'avatars' storage bucket under the
+// user's own folder (user_id/filename) and calls onUploadSuccess with the public URL.
+// The parent is responsible for saving that URL to the Profiles table.
+//
+// Files larger than 8 MB are rejected before the upload is attempted to avoid
+// hitting Supabase's storage limits and to give the user immediate feedback.
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../Services/supabaseClient';
 import '../Styles/authentication.css';

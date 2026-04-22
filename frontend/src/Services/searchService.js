@@ -4,7 +4,13 @@ export const searchDatabase = async (query, type) => {
   if (!query) return [];
 
   let table = (type === "users") ? "Profiles" : "Books";
-  let queryBuilder = supabase.from(table).select("*");
+
+  // [PERF FIX #3] Replaced select("*") with only the columns needed for
+  // BookCard/UserCard display. Reduces payload size significantly on search results.
+  const columns = (type === "users")
+    ? "id, username, avatar_url"
+    : "isbn, book_title, book_author, image_url_m, image_url_l";
+  let queryBuilder = supabase.from(table).select(columns);
 
   // Handle different search categories
   if (type === "users") {

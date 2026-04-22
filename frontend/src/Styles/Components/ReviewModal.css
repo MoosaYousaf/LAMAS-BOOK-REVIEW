@@ -1,5 +1,12 @@
-/* ReviewModal.css */
+/* ============================================
+   ReviewModal.css
+   Dark glass overlay modal for writing a review.
+   Two flows share this modal:
+     1. Book pre-selected (from Book Detail page) — jump straight to the form.
+     2. No book selected — show a search step first, then the form.
+   ============================================ */
 
+/* Modal container — sits inside the shared .modal-overlay and .modal-glass wrappers */
 .rmodal {
   width: 90%;
   max-width: 480px;

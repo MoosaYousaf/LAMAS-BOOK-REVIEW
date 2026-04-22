@@ -24,6 +24,11 @@
   display: flex;
   gap: 28px;
   align-items: flex-start;
+  /* backdrop-filter on .glass creates a stacking context, which traps the shelf
+     popup's z-index inside this panel. Setting position + z-index here ensures
+     the entire panel (and the popup inside it) stack above the reviews panel below. */
+  position: relative;
+  z-index: 2;
 }
 
 .bdp-cover-col {
@@ -55,11 +60,19 @@
   font-size: 11px;
 }
 
-/* Shelf button on cover */
-.bdp-shelf-btn {
+/* Shelf button wrapper — positions the circular +/✓ button at the bottom-right
+   corner of the book cover. The popup is a child of this wrapper so it can be
+   positioned relative to the button using top: 100% (directly below it). */
+.bdp-shelf-btn-wrap {
   position: absolute;
   bottom: -12px;
   right: -12px;
+}
+
+/* Shelf button on cover — z-index: 2 keeps it above the popup (z-index: 1) */
+.bdp-shelf-btn {
+  position: relative;
+  z-index: 2;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -78,11 +91,22 @@
 .bdp-shelf-btn--out { background: rgba(255,255,255,0.12); color: var(--color-text-secondary); }
 .bdp-shelf-btn:hover { transform: scale(1.08); }
 
-/* ---- Shelf selector modal (modal-lite warm cream style) ---- */
-.bdp-shelf-modal {
-  max-width: 340px;
-  width: 90%;
-  padding: 28px;
+/* Shelf popup — cream panel that opens when the +/✓ button is clicked.
+   top: 100% places the popup's top edge flush against the bottom of the button.
+   right: 50% aligns the popup's right edge to the horizontal midpoint of the
+   wrapper (= the button's center), so the top-right corner of the box sits at
+   the bottom-middle of the circle. */
+.bdp-shelf-popup {
+  position: absolute;
+  top: 100%;
+  right: 50%;
+  z-index: 100;
+  width: 210px;
+  background: linear-gradient(145deg, rgba(250, 244, 237, 0.99), rgba(243, 232, 218, 0.99));
+  border: 1px solid rgba(193, 143, 107, 0.35);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  padding: 14px;
 }
 
 .bdp-shelf-modal-title {

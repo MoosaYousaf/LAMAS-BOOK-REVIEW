@@ -1,3 +1,24 @@
+// ListModal — full-screen modal for viewing and managing a custom book shelf.
+// It has two modes controlled by `isEditing`:
+//
+//   View mode (default when `list` is provided):
+//     Displays the shelf name, description, and a grid of all books on the shelf.
+//     Owners see a "Manage Shelf" button and a "Remove" link on each book.
+//
+//   Edit/Create mode (default when `list` is null — creating a new shelf):
+//     Shows a form for the shelf name, description, and privacy toggle.
+//     Also shows a book search input so the owner can add books immediately.
+//     Save calls an upsert: UPDATE if the shelf already exists, INSERT if new.
+//
+// The `pendingBook` state drives a confirmation overlay that appears before
+// adding a book, giving the user a chance to cancel.
+//
+// Props:
+//   list         — the existing shelf object, or null to open in create mode
+//   isOwnProfile — controls whether edit/remove actions are shown
+//   onClose      — closes the modal
+//   onUpdate     — re-fetches shelf data in the parent after any change
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../../Services/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +29,7 @@ import '../../Styles/Components/ShelvesManager.css';
 
 const ListModal = ({ list, isOwnProfile, onClose, onUpdate }) => {
     const navigate = useNavigate();
+    // Start in edit/create mode when no existing list is provided
     const [isEditing, setIsEditing] = useState(!list);
     const [loading, setLoading] = useState(false);
     const [books, setBooks] = useState([]);
@@ -44,6 +66,7 @@ const ListModal = ({ list, isOwnProfile, onClose, onUpdate }) => {
         const { error } = await supabase
             .from('ListEntries').insert([{ list_id: list.id, isbn: pendingBook.isbn }]);
         if (error) {
+            // Postgres error 23505 is a unique-constraint violation — the book is already on this shelf
             alert(error.code === '23505' ? 'Book is already on this shelf.' : error.message);
         } else {
             setBooks([...books, { isbn: pendingBook.isbn, Books: pendingBook }]);
@@ -69,6 +92,7 @@ const ListModal = ({ list, isOwnProfile, onClose, onUpdate }) => {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         const payload = { ...formData, user_id: user.id };
+        // Upsert logic: UPDATE the existing shelf if list.id is present, INSERT if creating new
         const { error } = list?.id
             ? await supabase.from('UserLists').update(payload).eq('id', list.id)
             : await supabase.from('UserLists').insert([payload]);

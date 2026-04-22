@@ -1,3 +1,21 @@
+// NotificationRow — a single row in the Notifications page for a follow event.
+// Each row represents one person who followed (or requested to follow) the current user.
+// The actions available depend on the relationship state:
+//
+//   status = 'pending':
+//     The follower wants to follow a private account.
+//     Buttons: Accept (sets status → 'accepted') | Decline (deletes the row).
+//
+//   status = 'accepted', isAlreadyFollowingBack = false:
+//     The current user is not yet following back.
+//     Button: Follow Back (inserts a new Followers row, respecting the follower's own privacy).
+//
+//   status = 'accepted', isAlreadyFollowingBack = true:
+//     Mutual follow. Shows a "Mutual" badge and an Unfollow option.
+//
+// `refresh` is called after every action to re-fetch the notification list.
+// `onOpenProfile` navigates to the follower's profile page when their avatar/name is clicked.
+
 import { supabase } from '../../Services/supabaseClient';
 import '../../Styles/variables.css';
 import '../../Styles/Components/ShelvesManager.css';

@@ -1,4 +1,9 @@
-/* ReviewDetailModal.css — lighter warm tone */
+/* ============================================
+   ReviewDetailModal.css
+   Lighter warm cream modal for reading a full review.
+   Uses the .modal-lite base from theme.css (cream background, dark text).
+   Allows the owner to edit or delete their own review inline.
+   ============================================ */
 
 .rdm__top {
   display: flex;

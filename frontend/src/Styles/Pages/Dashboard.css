@@ -21,7 +21,9 @@
   background-size: cover;
   background-position: top center;
   transform: translateZ(0);
-  will-change: transform;
+  /* [PERF FIX #4] Removed will-change: transform — this element never transforms.
+     Keeping it here forces the GPU to hold a permanent layer for no reason,
+     contributing to hover jank across the 24-card book grid. */
 }
 
 /* Dark overlay on top of background */
@@ -137,8 +139,11 @@
     rgba(255, 255, 255, 0.05) 50%,
     rgba(255, 255, 255, 0.08) 100%
   );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* [PERF FIX #5] Reduced blur from 12px to 6px. The larger value forces a
+     full panel re-composite on every hover inside it. 6px is visually close
+     enough to preserve the glassmorphism effect at significantly lower GPU cost. */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:

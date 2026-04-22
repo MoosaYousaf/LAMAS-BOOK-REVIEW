@@ -1,21 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../Services/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { IoNotificationsCircle } from 'react-icons/io5';
+import { MdPeople } from 'react-icons/md';
 import SearchBar from '../Components/SearchBar';
 import SidebarNav from '../Components/SidebarNav';
 import BookCard from '../Components/Cards/BookCard';
+import '../Styles/variables.css';
+import '../Styles/Pages/Dashboard.css'
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState('');
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [booksOfTheWeek, setBooksOfTheWeek] = useState([]);
   const [booksLoading, setBooksLoading] = useState(false);
+  const [friendCount, setFriendCount] = useState(0);
 
   const fetchBooksOfTheWeek = useCallback(async () => {
     setBooksLoading(true);
-
     const { count, error: countError } = await supabase
       .from('Books')
       .select('*', { count: 'exact', head: true });
@@ -26,39 +28,25 @@ function Dashboard() {
       return;
     }
 
-    // UPDATED: Changed sample size to 12
-    const sampleSize = Math.min(12, count);
-    const chosenIndexes = new Set();
+    const sampleSize = Math.min(24, count);
+    const maxOffset = Math.max(0, count - sampleSize);
+    const offset = Math.floor(Math.random() * maxOffset);
 
-    while (chosenIndexes.size < sampleSize) {
-      chosenIndexes.add(Math.floor(Math.random() * count));
+    const { data, error } = await supabase
+      .from('Books')
+      .select('isbn, book_title, book_author, image_url_m, image_url_l')
+      .range(offset, offset + sampleSize - 1);
+
+    if (!error && data) {
+      setBooksOfTheWeek([...data].sort(() => Math.random() - 0.5));
     }
-
-    const randomIndexes = [...chosenIndexes];
-    const randomBooks = [];
-
-    for (const idx of randomIndexes) {
-      const { data, error } = await supabase
-        .from('Books')
-        .select('isbn, book_title, book_author, image_url_m, image_url_l')
-        .range(idx, idx)
-        .single();
-
-      if (!error && data) randomBooks.push(data);
-    }
-
-    setBooksOfTheWeek(randomBooks);
     setBooksLoading(false);
   }, []);
 
   useEffect(() => {
     const syncUserSession = async () => {
-      const { data : { user }, error: authError } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        navigate('/');
-        return;
-      }
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) { navigate('/'); return; }
 
       const { data: profile, error: profileError } = await supabase
         .from('Profiles')
@@ -70,6 +58,16 @@ function Dashboard() {
         navigate('/createAccount');
       } else {
         setUserProfile(profile);
+
+        // Fetch mutual friend count
+        const [followingRes, followersRes] = await Promise.all([
+          supabase.from('Followers').select('following_id').eq('follower_id', user.id).eq('status', 'accepted'),
+          supabase.from('Followers').select('follower_id').eq('following_id', user.id).eq('status', 'accepted'),
+        ]);
+        const followingIds = new Set(followingRes.data?.map(f => f.following_id));
+        const mutualCount = followersRes.data?.filter(f => followingIds.has(f.follower_id)).length || 0;
+        setFriendCount(mutualCount);
+
         setLoading(false);
       }
     };
@@ -78,156 +76,104 @@ function Dashboard() {
     fetchBooksOfTheWeek();
   }, [navigate, fetchBooksOfTheWeek]);
 
-  const handleSearch = (query, type) => {
-    if (!query) {
-      console.warn("Search blocked: Query is empty");
-      return;
-    }
+  if (loading) {
+    return (
+      <div className="dashboard__syncing">
+        Syncing session...
+      </div>
+    );
+  }
 
-    const url = `/search?q=${encodeURIComponent(query)}&type=${type}`;
-    navigate(url);
-  };
-
-  const handleFeelingLucky = async () => {
-    try {
-      const { count, error: countError } = await supabase
-        .from('Books')
-        .select('*', { count: 'exact', head: true });
-
-      if (countError) {
-        console.error("Error fetching book count:", countError);
-        return;
-      }
-
-      if (count && count > 0) {
-        const randomIndex = Math.floor(Math.random() * count);
-
-        const { data, error } = await supabase
-          .from('Books')
-          .select('book_title')
-          .range(randomIndex, randomIndex)
-          .single();
-
-        if (error) {
-          console.error("Error fetching lucky book:", error);
-          return;
-        }
-
-        if (data?.book_title) {
-          handleSearch(data.book_title, 'books');
-        }
-      }
-    } catch (err) {
-      console.error("Unexpected error in feeling lucky:", err);
-    }
-  };
-
-  if (loading) return <div style={{ padding: '20px'}}>Syncing session...</div>;
+  const avatarInitial = userProfile?.username?.charAt(0).toUpperCase() || '?';
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+    <div className="dashboard">
+      {/* Background */}
+      <div className="dashboard__bg" />
+
+      {/* Sidebar */}
       <SidebarNav />
 
-      <div style={{ flex: 1, padding: '20px' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-          <h2>LAMAS BOOK REVIEW</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <button
-              onClick={() => navigate('/notifications')}
-              title="Notifications"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            >
-              <IoNotificationsCircle size={34} color="#555" />
-            </button>
-            {userProfile ? (
-              <>
-                <span>Welcome, <strong>{userProfile.username}</strong>!</span>
-                {userProfile.avatar_url && (
-                  <img
-                    src={userProfile.avatar_url}
-                    alt="Profile"
-                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', display: 'block' }}
-                  />
-                )}
-              </>
+      {/* Main content */}
+      <div className="dashboard__main">
+
+        {/* Top bar */}
+        <header className="dashboard__topbar">
+          <h1 className="dashboard__site-title">Lamas Book Review</h1>
+
+          <div className="dashboard__topbar-right">
+            <div className="dashboard__friend-count">
+              <MdPeople className="dashboard__friend-count-icon" />
+              <span>{friendCount}</span>
+            </div>
+
+            <span className="dashboard__welcome">
+              Welcome, <strong>{userProfile?.username}</strong>
+            </span>
+
+            {userProfile?.avatar_url ? (
+              <img
+                src={userProfile.avatar_url}
+                alt={userProfile.username}
+                className="dashboard__avatar"
+                onClick={() => navigate(`/profile/${userProfile.id}`)}
+              />
             ) : (
-              <span>Welcome, Guest!</span>
+              <div
+                className="dashboard__avatar-placeholder"
+                onClick={() => navigate(`/profile/${userProfile?.id}`)}
+              >
+                {avatarInitial}
+              </div>
             )}
           </div>
         </header>
 
-        <main style={{ marginTop: '30px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
-            <h3>Search Books or Users</h3>
-            <SearchBar onSearch={handleSearch} />
+        {/* Glass panel */}
+        <div className="dashboard__panel">
 
-            <button
-              onClick={handleFeelingLucky}
-              style={{
-                marginTop: '15px',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: '1px solid #ddd',
-                background: '#f8f9fa',
-                cursor: 'pointer',
-                fontSize: '14px',
-                transition: 'background 0.2s'
-              }}
-              onMouseOver={(e) => e.target.style.background = '#e2e6ea'}
-              onMouseOut={(e) => e.target.style.background = '#f8f9fa'}
-            >
-              I'm Feeling Lucky 🎲
-            </button>
-
-            {/* UPDATED: Increased maxWidth to 1600px for a wider container */}
-            <div style={{ 
-                marginTop: '50px', 
-                width: '100%', 
-                maxWidth: '1600px', 
-                padding: '24px', 
-                border: '1px solid #ccc', 
-                borderRadius: '12px', 
-                backgroundColor: '#fff' 
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 style={{ margin: 0 }}>Explore New Titles</h3>
-                <button
-                  type="button"
-                  onClick={fetchBooksOfTheWeek}
-                  style={{ border: '1px solid #ddd', background: '#fff', borderRadius: '16px', padding: '8px 14px', cursor: 'pointer' }}
-                  disabled={booksLoading}
-                >
-                  {booksLoading ? 'Shuffling...' : 'Shuffle Picks'}
-                </button>
-              </div>
-
-              {booksLoading ? (
-                <p>Loading books...</p>
-              ) : booksOfTheWeek.length === 0 ? (
-                <p style={{ color: '#777' }}>No books available to feature.</p>
-              ) : (
-                <div style={{ 
-                    display: 'grid', 
-                    // Adjusted minmax and gap to handle 12 items comfortably
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
-                    gap: '30px' 
-                }}>
-                  {booksOfTheWeek.map((book) => (
-                    <button
-                      key={book.isbn}
-                      type="button"
-                      onClick={() => navigate(`/book/${book.isbn}`, { state: { book } })}
-                      style={{ border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', padding: 0 }}
-                    >
-                      <BookCard book={book} />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* Search section */}
+          <div className="dashboard__search-section">
+            <h2 className="dashboard__search-title">Search Books or Users</h2>
+            <SearchBar />
           </div>
-        </main>
+
+          {/* Explore section */}
+          <div>
+            <div className="dashboard__explore-header">
+              <h3 className="dashboard__explore-title">Explore New Titles</h3>
+              <button
+                type="button"
+                onClick={fetchBooksOfTheWeek}
+                className="dashboard__shuffle-btn"
+                disabled={booksLoading}
+              >
+                {booksLoading ? 'Shuffling...' : 'Shuffle Picks'}
+              </button>
+            </div>
+
+            {booksLoading ? (
+              <p className="dashboard__loading">Loading books...</p>
+            ) : booksOfTheWeek.length === 0 ? (
+              <p className="dashboard__empty">No books available to feature.</p>
+            ) : (
+              <div className="dashboard__book-grid">
+                {booksOfTheWeek.map((book) => (
+                  <button
+                    key={book.isbn}
+                    type="button"
+                    onClick={() => navigate(`/book/${book.isbn}`, { state: { book } })}
+                    style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <BookCard book={book} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
     </div>
   );
 }

@@ -1,0 +1,106 @@
+/* ReviewDetailModal.css — lighter warm tone */
+
+.rdm__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(193,143,107,0.25);
+}
+
+.rdm__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+.rdm__user:hover { opacity: 0.8; }
+
+.rdm__pfp {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(193,143,107,0.5);
+}
+
+.rdm__username {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-bg);
+}
+
+.rdm__date {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: rgba(30,22,17,0.5);
+}
+
+/* Book row */
+.rdm__book-row {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(193,143,107,0.25);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+.rdm__book-row:hover { opacity: 0.85; }
+
+.rdm__book-cover {
+  width: 90px;
+  height: 135px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.rdm__book-meta { flex: 1; min-width: 0; }
+
+.rdm__book-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-bg);
+  margin: 0 0 4px;
+}
+
+.rdm__book-author {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: rgba(30,22,17,0.6);
+  margin: 0 0 12px;
+}
+
+.rdm__rating {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-glow);
+  font-weight: 700;
+}
+
+/* Review text */
+.rdm__text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(30,22,17,0.85);
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* Footer */
+.rdm__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  gap: 10px;
+}
+
+.rdm__footer-left { display: flex; gap: 10px; }

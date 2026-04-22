@@ -13,21 +13,19 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
             if (!userId) return;
             setLoading(true);
 
-            // Fetch reviews, join with Books, and join with Profiles
+            // Fetch reviews joined with book and profile data
             const { data, error } = await supabase
                 .from('Reviews')
                 .select(`
                     *,
                     Books(*),
                     profiles:user_id(*)
-                `) 
+                `)
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false })
                 .range(0, limit - 1);
-            
-            if (error) {
-                console.error("Fetch error:", error);
-            }
+
+            if (error) console.error('Fetch error:', error);
 
             if (data) {
                 setReviews(data);
@@ -39,7 +37,9 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
         fetchReviews();
     }, [userId, limit, refreshKey]);
 
-    if (loading && reviews.length === 0) return <p style={styles.statusText}>Loading reviews...</p>;
+    if (loading && reviews.length === 0) {
+        return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '20px', fontFamily: 'var(--font-body)', fontSize: '14px' }}>Loading reviews...</p>;
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -52,26 +52,41 @@ const ReviewList = ({ userId, refreshKey = 0, onReviewClick }) => {
                             onClick={onReviewClick}
                         />
                     ))}
-                    
+
                     {hasMore && (
-                        <button onClick={() => setLimit(prev => prev + 5)} style={styles.loadMoreBtn}>
+                        <button onClick={() => setLimit(prev => prev + 5)} style={{
+                            padding: '12px',
+                            cursor: 'pointer',
+                            background: 'rgba(255,255,255,0.07)',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                            borderRadius: '8px',
+                            fontFamily: 'var(--font-body)',
+                            fontWeight: '600',
+                            fontSize: '13px',
+                            color: 'var(--color-text-secondary)',
+                            marginTop: '10px',
+                            transition: 'background 0.15s ease',
+                        }}>
                             Load More
                         </button>
                     )}
                 </>
             ) : (
-                <div style={styles.emptyState}>
-                    <p>No reviews posted yet.</p>
+                <div style={{
+                    textAlign: 'center',
+                    padding: '40px',
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '12px',
+                    border: '1px dashed rgba(255,255,255,0.12)',
+                    color: 'var(--color-text-muted)',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '14px',
+                }}>
+                    <p style={{ margin: 0 }}>No reviews posted yet.</p>
                 </div>
             )}
         </div>
     );
-};
-
-const styles = {
-    statusText: { textAlign: 'center', color: '#666', padding: '20px' },
-    loadMoreBtn: { padding: '12px', cursor: 'pointer', background: '#fff', border: '1px solid #ddd', borderRadius: '8px', fontWeight: 'bold', color: '#555', marginTop: '10px' },
-    emptyState: { textAlign: 'center', padding: '40px', background: '#f9f9f9', borderRadius: '12px', border: '1px dashed #ccc', color: '#999' }
 };
 
 export default ReviewList;

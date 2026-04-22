@@ -1,0 +1,42 @@
+/* ============================================
+   LAMAS BOOK REVIEW — Design System Variables
+   Warm Amber Glassmorphism Theme
+   ============================================ */
+
+:root {
+  /* --- Color Palette --- */
+  --color-bg:             #1E1611;
+  --color-bg-deep:        #150F0B;
+  --color-sidebar:        #231B15;
+  --color-copper:         #C18F6B;
+  --color-copper-light:   #D4A574;
+  --color-glow:           #EE8A34;
+  --color-glow-soft:      rgba(238, 138, 52, 0.4);
+  --color-text-primary:   #EFE3DB;
+  --color-text-secondary: #C8B6A7;
+  --color-text-muted:     #8A7060;
+  --color-white-10:       rgba(255, 255, 255, 0.10);
+  --color-white-15:       rgba(255, 255, 255, 0.15);
+  --color-white-30:       rgba(255, 255, 255, 0.30);
+  --color-white-50:       rgba(255, 255, 255, 0.50);
+
+  /* --- Glass Panel --- */
+  --glass-bg:             rgba(255, 255, 255, 0.06);
+  --glass-border:         rgba(255, 255, 255, 0.12);
+  --glass-blur:           blur(30px);
+  --glass-shadow:         0 8px 40px rgba(13, 9, 7, 0.6);
+
+  /* --- Typography --- */
+  --font-display:         'Crimson Pro', Georgia, serif;
+  --font-body:            'Montserrat', sans-serif;
+
+  /* --- Spacing --- */
+  --sidebar-width:        90px;
+  --radius-sm:            8px;
+  --radius-md:            12px;
+  --radius-lg:            20px;
+
+  /* --- Transitions --- */
+  --transition-fast:      0.15s ease;
+  --transition-med:       0.25s ease;
+}

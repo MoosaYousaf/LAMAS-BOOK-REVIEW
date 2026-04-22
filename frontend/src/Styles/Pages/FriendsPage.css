@@ -1,0 +1,130 @@
+/* FriendsPage.css */
+
+.friends-layout {
+  display: flex;
+  gap: 20px;
+  padding: 24px;
+  align-items: flex-start;
+  flex: 1;
+}
+
+/* ---- Left: review feed ---- */
+.friends-feed {
+  flex: 2.5;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.friends-feed__title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+/* ---- Right: friends list ---- */
+.friends-list {
+  flex: 1;
+  padding: 22px;
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+}
+
+.friends-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.friends-list__title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.friends-list__items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.friends-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.friends-item:hover { background: rgba(255,255,255,0.06); }
+.friends-item--active {
+  background: rgba(238, 138, 52, 0.1);
+  border-color: rgba(238, 138, 52, 0.3);
+}
+
+.friends-item__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--color-copper);
+  flex-shrink: 0;
+}
+
+.friends-item__name {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.friends-item__name:hover { color: var(--color-copper-light); }
+
+/* ---- Friend search modal ---- */
+.friends-search-modal {
+  width: 340px;
+  padding: 28px;
+}
+
+.friends-search-modal__title {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 20px;
+}
+
+.friends-search-modal__results {
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.friends-search-result {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: background var(--transition-fast);
+}
+.friends-search-result:hover { background: rgba(255,255,255,0.08); }

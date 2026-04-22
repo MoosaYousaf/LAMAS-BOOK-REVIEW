@@ -1,0 +1,55 @@
+/* TabSystem.css */
+
+.tab-container {
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 40px rgba(13, 9, 7, 0.6), inset 0 1px 0.5px rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+}
+
+.tab-headers {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-x: auto;
+  background: rgba(0,0,0,0.15);
+}
+
+.tab-btn {
+  padding: 14px 24px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tab-btn:hover { color: var(--color-text-secondary); }
+
+.tab-btn--active {
+  color: var(--color-copper-light);
+  border-bottom-color: var(--color-glow);
+  background: rgba(255,255,255,0.03);
+}
+
+.tab-content {
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
+}

@@ -1,0 +1,250 @@
+/* ============================================
+   Dashboard.css
+   Full glassmorphism dashboard layout
+   ============================================ */
+
+/* ---- Page wrapper ---- */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background image layer */
+.dashboard__bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url('../../assets/background1.jpg');
+  background-size: cover;
+  background-position: top center;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Dark overlay on top of background */
+.dashboard__bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(30, 22, 17, 0.60);
+}
+
+/* ---- Main content (offset by sidebar) ---- */
+.dashboard__main {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* ---- Top bar ---- */
+.dashboard__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.dashboard__site-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-copper);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.dashboard__topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard__friend-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.dashboard__friend-count-icon {
+  font-size: 16px;
+  color: var(--color-copper);
+}
+
+.dashboard__welcome {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.dashboard__welcome strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.dashboard__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-copper);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.dashboard__avatar:hover {
+  border-color: var(--color-glow);
+}
+
+.dashboard__avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-copper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-bg);
+  cursor: pointer;
+  border: 2px solid var(--color-copper);
+}
+
+/* ---- Glass content panel ---- */
+.dashboard__panel {
+  margin: 0 24px 24px;
+  flex: 1;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 4px 40px rgba(13, 9, 7, 0.6),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.4);
+  padding: 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ---- Search section ---- */
+.dashboard__search-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.dashboard__search-title {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Explore section ---- */
+.dashboard__explore-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dashboard__explore-title {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.dashboard__shuffle-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  letter-spacing: 0.03em;
+}
+
+.dashboard__shuffle-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-text-primary);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.dashboard__shuffle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Book grid ---- */
+.dashboard__book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+/* ---- Loading / empty states ---- */
+.dashboard__loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.dashboard__empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* ---- Syncing state ---- */
+.dashboard__syncing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+

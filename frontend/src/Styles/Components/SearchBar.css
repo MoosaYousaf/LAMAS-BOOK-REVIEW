@@ -1,0 +1,144 @@
+/* ============================================
+   SearchBar.css
+   Glassmorphism search bar with copper accents
+   ============================================ */
+
+.searchbar {
+  width: 100%;
+  max-width: 560px;
+  position: relative;
+}
+
+.searchbar__form {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: visible;
+  transition: border-color var(--transition-med), box-shadow var(--transition-med);
+}
+
+.searchbar__form:focus-within {
+  border-color: rgba(193, 143, 107, 0.5);
+  box-shadow: 0 0 0 3px rgba(238, 138, 52, 0.1);
+}
+
+/* Type selector dropdown */
+.searchbar__select {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px 0 0 50px;
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 14px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 80px;
+  text-align: center;
+}
+
+.searchbar__select option {
+  background: var(--color-sidebar);
+  color: var(--color-text-primary);
+}
+
+/* Text input */
+.searchbar__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 12px 16px;
+  outline: none;
+  min-width: 0;
+}
+
+.searchbar__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Icon buttons on the right */
+.searchbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 10px;
+}
+
+.searchbar__icon-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  font-size: 18px;
+}
+
+.searchbar__icon-btn:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Dropdown results */
+.searchbar__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: rgba(35, 27, 21, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow);
+  z-index: 1000;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.searchbar__result-item {
+  padding: 12px 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background var(--transition-fast);
+}
+
+.searchbar__result-item:last-child {
+  border-bottom: none;
+}
+
+.searchbar__result-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.searchbar__result-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.searchbar__result-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}

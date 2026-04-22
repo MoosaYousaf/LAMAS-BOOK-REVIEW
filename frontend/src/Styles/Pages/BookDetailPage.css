@@ -1,0 +1,228 @@
+/* BookDetailPage.css */
+
+.bdp-content {
+  flex: 1;
+  padding: 28px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.bdp-back {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 8px 16px;
+}
+
+/* ---- Book info panel ---- */
+.bdp-info-panel {
+  padding: 28px;
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.bdp-cover-col {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bdp-cover {
+  width: 170px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: block;
+}
+
+.bdp-cover-fallback {
+  width: 170px;
+  height: 250px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(145deg, rgba(193,143,107,0.15), rgba(30,22,17,0.5));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 11px;
+}
+
+/* Shelf button on cover */
+.bdp-shelf-btn {
+  position: absolute;
+  bottom: -12px;
+  right: -12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.bdp-shelf-btn--in { background: var(--color-glow); color: var(--color-bg); }
+.bdp-shelf-btn--out { background: rgba(255,255,255,0.12); color: var(--color-text-secondary); }
+.bdp-shelf-btn:hover { transform: scale(1.08); }
+
+/* ---- Shelf selector modal (modal-lite warm cream style) ---- */
+.bdp-shelf-modal {
+  max-width: 340px;
+  width: 90%;
+  padding: 28px;
+}
+
+.bdp-shelf-modal-title {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(30,22,17,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 16px;
+}
+
+.bdp-shelf-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bdp-shelf-modal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-bg);
+  background: rgba(30,22,17,0.06);
+  border: 1px solid rgba(193,143,107,0.2);
+  transition: background var(--transition-fast);
+}
+.bdp-shelf-modal-item:hover { background: rgba(30,22,17,0.12); }
+
+.bdp-shelf-modal-item--in {
+  background: rgba(193,143,107,0.15);
+  border-color: rgba(193,143,107,0.45);
+}
+
+.bdp-shelf-modal-item--disabled {
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: rgba(30,22,17,0.35);
+  border: 1px dashed rgba(193,143,107,0.2);
+  border-radius: var(--radius-sm);
+  cursor: default;
+}
+
+.bdp-mini-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--color-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* ---- Meta section ---- */
+.bdp-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.bdp-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+
+.bdp-meta-row {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.bdp-meta-row strong {
+  color: var(--color-copper-light);
+  font-weight: 600;
+}
+
+.bdp-description-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 18px 0 8px;
+}
+
+.bdp-description {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ---- Reviews panel ---- */
+.bdp-reviews-panel {
+  padding: 28px;
+}
+
+.bdp-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.bdp-reviews-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.bdp-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bdp-no-reviews {
+  text-align: center;
+  padding: 40px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-muted);
+}

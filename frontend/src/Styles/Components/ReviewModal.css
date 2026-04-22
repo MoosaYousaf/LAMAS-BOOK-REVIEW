@@ -1,0 +1,131 @@
+/* ReviewModal.css */
+
+.rmodal {
+  width: 90%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rmodal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rmodal__title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Book search */
+.rmodal__search-row {
+  display: flex;
+  gap: 10px;
+}
+
+.rmodal__search-row .glass-input { flex: 1; }
+
+.rmodal__results {
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,0.2);
+}
+
+.rmodal__result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast);
+}
+.rmodal__result-item:hover { background: rgba(255,255,255,0.06); }
+.rmodal__result-item:last-child { border-bottom: none; }
+.rmodal__result-item strong { color: var(--color-text-primary); }
+
+.rmodal__result-thumb {
+  width: 30px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+}
+
+/* Selected book display */
+.rmodal__selected-book {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+  align-items: center;
+}
+
+.rmodal__mini-cover {
+  width: 46px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.rmodal__selected-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rmodal__selected-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 3px;
+}
+
+.rmodal__selected-author {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 0 0 6px;
+}
+
+.rmodal__change-btn {
+  background: none;
+  border: none;
+  color: var(--color-copper-light);
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Form */
+.rmodal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rmodal__error {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #e05a5a;
+  background: rgba(224,90,90,0.1);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(224,90,90,0.25);
+}

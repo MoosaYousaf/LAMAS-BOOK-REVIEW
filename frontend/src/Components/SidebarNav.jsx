@@ -1,89 +1,93 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../Services/supabaseClient';
-import { IoPersonCircleOutline } from 'react-icons/io5';
+import {
+  MdDashboard,
+  MdPeople,
+  MdSettings,
+  MdNotifications,
+  MdLogout,
+  MdPerson
+} from 'react-icons/md';
+import '../Styles/variables.css';
+import '../Styles/Components/SidebarNav.css';
 
 function SidebarNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [ myId, setMyId ] = useState(null);
+  const [myId, setMyId] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     const getSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) setMyId(user.id);
+      if (user) {
+        setMyId(user.id);
+        const { data: profile } = await supabase
+          .from('Profiles')
+          .select('avatar_url, username')
+          .eq('id', user.id)
+          .single();
+        if (profile) {
+          setAvatarUrl(profile.avatar_url);
+          setUsername(profile.username);
+        }
+      }
     };
     getSession();
   }, []);
 
-  // "Shelves" removed from here
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard' },
-    { label: 'Friends', path: '/friends' },
-    { label: 'Settings', path: '/settings' },
-    { label: 'Notifications', path: '/notifications'},
+    { label: 'Dashboard',     path: '/dashboard',    icon: <MdDashboard /> },
+    { label: 'Community',     path: '/friends',       icon: <MdPeople /> },
+    { label: 'Settings',      path: '/settings',      icon: <MdSettings /> },
+    { label: 'Alerts',        path: '/notifications', icon: <MdNotifications /> },
   ];
 
-  const goToMyProfile = () => {
-    if (myId) navigate(`/profile/${myId}`);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
   };
 
   return (
-    <aside
-      style={{
-        width: '200px',
-        minHeight: '100vh',
-        borderRight: '1px solid #ccc',
-        padding: '16px',
-        boxSizing: 'border-box',
-      }}
-    >
-      <div>
-        <div style={{ fontWeight: 700, marginBottom: '12px' }}>MENU</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => navigate(item.path)}
-                style={{
-                  padding: '8px 10px',
-                  border: '1px solid #ccc',
-                  background: '#fff',
-                  cursor: 'pointer',
-                  fontWeight: isActive ? 700 : 400,
-                  textAlign: 'left'
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <aside className="sidebar">
+      <div className="sidebar__logo" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>L<br/>B<br/>R</div>
 
-      <div style={{
-        borderTop: '1px solid #eee',
-        paddingTop: '15px',
-        marginTop: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '10px'
-      }}>
+      <nav className="sidebar__nav">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => navigate(item.path)}
+              className={`sidebar__nav-item${isActive ? ' sidebar__nav-item--active' : ''}`}
+            >
+              <span className="sidebar__nav-icon">{item.icon}</span>
+              <span className="sidebar__nav-label">{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className="sidebar__bottom">
         <button
-          onClick={goToMyProfile}
+          onClick={() => myId && navigate(`/profile/${myId}`)}
+          className="sidebar__profile-btn"
           title="My Profile"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '10px', transition: 'transform 0.2s' }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <IoPersonCircleOutline
-            size={40}
-            color={location.pathname.includes(myId) && myId !== null ? '#007bff' : '#555'}
-          />
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={username} className="sidebar__avatar" />
+          ) : (
+            <span className="sidebar__nav-icon"><MdPerson /></span>
+          )}
+          <span className="sidebar__nav-label">Profile</span>
+        </button>
+
+        <button onClick={handleLogout} className="sidebar__logout-btn" title="Logout">
+          <span className="sidebar__nav-icon"><MdLogout /></span>
+          <span className="sidebar__nav-label">Logout</span>
         </button>
       </div>
     </aside>

@@ -1,22 +1,38 @@
-const BookCard = ({ book }) => (
-    <div style={{
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        padding: '15px',
-        width: '200px',
-        textAlign: 'center',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-    }}>
-        <img
-            src={book.image_url_m || 'https://via.placeholder.com/150x200?text=No+Image'}
-            alt={book.book_title}
-            style={{width: '100%', height: '200px', objectFit: 'cover', margin: '10px'}}
-        />
+import { useState } from 'react';
+import '../../Styles/variables.css';
+import '../../Styles/Components/BookCard.css';
 
-        <h4 style={{ margin: '10px 0 5px', fontSize: '16px' }}>{book.book_title}</h4>
-        <p style={{ margin: '0', fontSize: '14px', color: '#555' }}>{book.book_author}</p>
-        <p style={{ fontSize: '12px', color: '#999' }}> ISBN: {book.isbn}</p>
-    </div>
-);
+const BookCard = ({ book }) => {
+    const [imgFailed, setImgFailed] = useState(false);
+
+    const primarySrc = book.image_url_m || book.image_url_l;
+
+    return (
+        <div className="book-card">
+            <div className="book-card__cover-wrap">
+                {!imgFailed && primarySrc ? (
+                    <img
+                        src={primarySrc}
+                        alt={book.book_title}
+                        className="book-card__cover"
+                        onError={() => setImgFailed(true)}
+                    />
+                ) : (
+                    <div className="book-card__cover-fallback">
+                        <span className="book-card__cover-fallback-icon">📖</span>
+                        <span className="book-card__cover-fallback-text">No Cover</span>
+                    </div>
+                )}
+            </div>
+            <div className="book-card__info">
+                <h4 className="book-card__title">{book.book_title}</h4>
+                <p className="book-card__author">{book.book_author}</p>
+                <div className="book-card__meta">
+                    <span className="book-card__isbn">{book.isbn}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default BookCard;
